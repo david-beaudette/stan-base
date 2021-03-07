@@ -22,6 +22,7 @@ float pitchAcc;
 float P_CompCoeff= 0.98;
 void ComplementaryFilter(int ax,int ay,int az,int gy,int gz) {
  long squaresum=(long)ay*ay+(long)az*az;
+ float delta_t = 0.01;
  pitch+=((-gy/32.8f)*(delta_t/1000000.0f));
  pitchAcc =atan(ax/sqrt(squaresum))*RAD_TO_DEG;
  pitch =P_CompCoeff*pitch + (1.0f-P_CompCoeff)*pitchAcc;

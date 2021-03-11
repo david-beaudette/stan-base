@@ -10,6 +10,7 @@
 
 // Project headers
 #include "nav.h"
+#include "ctl.h"
 
 void blink();
 void show();
@@ -17,6 +18,7 @@ void show();
 Scheduler runner;
 
 Task nav_task(5, TASK_FOREVER, &nav);
+Task ctl_task(50, TASK_FOREVER, &ctl);
 Task blink_task(1000, TASK_FOREVER, &blink);
 Task show_task(200, TASK_FOREVER, &show);
 

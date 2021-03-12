@@ -18,9 +18,9 @@ void show();
 Scheduler runner;
 
 Task nav_task(5, TASK_FOREVER, &nav);
-Task ctl_task(50, TASK_FOREVER, &ctl);
+Task ctl_task(1, TASK_FOREVER, &ctl);
 Task blink_task(1000, TASK_FOREVER, &blink);
-Task show_task(200, TASK_FOREVER, &show);
+Task show_task(5000, TASK_FOREVER, &show);
 
 // Health LED
 bool blinkState = false;
@@ -32,16 +32,19 @@ void setup() {
   Serial.begin(115200);
 
   nav_init();
+  ctl_init();
   
   runner.init();
   Serial.println("Initialized scheduler.");
   
   runner.addTask(nav_task);
+  runner.addTask(ctl_task);
   runner.addTask(blink_task);
   runner.addTask(show_task);
   Serial.println("Added tasks.");
   
   nav_task.enable();
+  ctl_task.enable();
   blink_task.enable();
   show_task.enable();
   Serial.println("Enabled tasks.");

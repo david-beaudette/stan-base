@@ -29,6 +29,9 @@ void ctl() {
   // Change direction at the limits
   if (mot_l.distanceToGo() == 0) mot_l.moveTo((long)pitch * 4);
   if (mot_r.distanceToGo() == 0) mot_r.moveTo((long)-pitch * 4);
+}
+
+void ctl_execute() {
   mot_l.run();
   mot_r.run();
 }

@@ -52,6 +52,7 @@ void setup() {
 
 void loop() {
   runner.execute();
+  ctl_execute();
 }
 
 void blink() {

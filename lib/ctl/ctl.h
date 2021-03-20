@@ -18,4 +18,6 @@ void ctl_init();
 
 void ctl();
 
+void ctl_execute();
+
 #endif // CTL_H

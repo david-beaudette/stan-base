@@ -14,17 +14,18 @@
 
 void blink();
 void show();
+void gnc_task_run();
 
 Scheduler runner;
 
-Task nav_task(5, TASK_FOREVER, &nav);
-Task ctl_task(1, TASK_FOREVER, &ctl);
+Task gnc_task(5, TASK_FOREVER, &gnc_task_run);
 Task blink_task(1000, TASK_FOREVER, &blink);
 Task show_task(5000, TASK_FOREVER, &show);
 
 // Health LED
 bool blinkState = false;
 
+float pitch_cur;
 
 void setup() {
 
@@ -37,14 +38,12 @@ void setup() {
   runner.init();
   Serial.println("Initialized scheduler.");
   
-  runner.addTask(nav_task);
-  runner.addTask(ctl_task);
+  runner.addTask(gnc_task);
   runner.addTask(blink_task);
   runner.addTask(show_task);
   Serial.println("Added tasks.");
   
-  nav_task.enable();
-  ctl_task.enable();
+  gnc_task.enable();
   blink_task.enable();
   show_task.enable();
   Serial.println("Enabled tasks.");
@@ -52,7 +51,15 @@ void setup() {
 
 void loop() {
   runner.execute();
-  ctl_execute();
+}
+
+void gnc_task_run() {
+  // Update pitch measurement
+  nav();
+  pitch_cur = nav_get_pitch();
+
+  // Update motor speed
+  ctl_set_motor_speed(1.0, -1.0);
 }
 
 void blink() {
@@ -66,7 +73,7 @@ void show() {
   Serial.print("count:\t");
   Serial.print((int)accel_isr_count);
   Serial.print("\tpitch:\t");
-  Serial.print(pitch);
+  Serial.print(pitch_cur);
   Serial.print("\tgyro:\t");
   Serial.print(gy);
   Serial.print("\taccel:\t");

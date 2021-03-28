@@ -41,6 +41,10 @@ void accel_isr() {
   return;
 }
 
+float nav_get_pitch() {
+  return pitch;
+}
+
 // One step of the pitch complementary filter
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy) {
   long squaresum = (long)ay * ay + (long)az * az;

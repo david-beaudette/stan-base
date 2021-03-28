@@ -19,10 +19,10 @@ extern int16_t gy;
 extern int16_t gy_bias;  
 extern float gy_sum;  
 
-extern float pitch;
-
 // One step of the pitch complementary filter
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy);
+
+float nav_get_pitch();
 
 bool nav_init();
 

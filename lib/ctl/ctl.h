@@ -8,11 +8,24 @@
 
 #include "Arduino.h"
 
-#define  MOTL_STEP   9
+#define  MOTL_STEP_PIN   9 // PB1
+#define  MOTL_STEP_SET_ORMASK B00000010
+#define  MOTL_STEP_CLR_ANDMASK B11111101
 #define  MOTL_DIR    5
-#define  MOTR_STEP   10
+#define  MOTR_STEP_PIN   10 // PB2
+#define  MOTR_STEP_SET_ORMASK B00000100
+#define  MOTR_STEP_CLR_ANDMASK B11111011
 #define  MOTR_DIR    7
 #define  MOT_NSLEEP  8
+
+#define  TIMER1_DOWN unsigned char sreg = SREG;  \
+                     cli();                      \
+                     TCCR1B = 0x00  
+
+#define  TIMER1_UP   TCCR1B = 0x01;  \
+                     sei();          \
+                     SREG = sreg    
+
 
 void ctl_init();
 

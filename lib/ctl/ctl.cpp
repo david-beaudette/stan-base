@@ -50,15 +50,15 @@ void ctl_init() {
   sei();
 
   // Setup motor control pins
-  pinMode(MOTL_STEP,  OUTPUT);
+  pinMode(MOTL_STEP_PIN,  OUTPUT);
   pinMode(MOTL_DIR,   OUTPUT);
-  pinMode(MOTR_STEP,  OUTPUT);
+  pinMode(MOTR_STEP_PIN,  OUTPUT);
   pinMode(MOTR_DIR,   OUTPUT);
   pinMode(MOT_NSLEEP, OUTPUT);
 
-  digitalWrite(MOTL_STEP,  LOW);
+  digitalWrite(MOTL_STEP_PIN,  LOW);
   digitalWrite(MOTL_DIR,   HIGH);
-  digitalWrite(MOTR_STEP,  LOW);
+  digitalWrite(MOTR_STEP_PIN,  LOW);
   digitalWrite(MOTR_DIR,   LOW);
 
   // Always start in sleep mode
@@ -70,15 +70,8 @@ void ctl_set_motor_speed(const float speed_left_f32,
   float speed_f32 = 0.0f;
   float pace_f32 = INFINITY;
   float pol_ticks_f32 = INFINITY;
-  float timer_val_f32 = INFINITY;
-
-  uint16_t motl_timer_val_ui16 = 0U;
-  uint16_t motr_timer_val_ui16 = 0U;
-  uint32_t motl_ovf_tgt_ui32 = 0U;
-  uint32_t motr_ovf_tgt_ui32 = 0U;
-
+  uint32_t next_compare_val_ui32;
   bool motl_stopped_b = true;
-  unsigned char sreg;
 
   if(speed_left_f32 > speed_min_pos_f32) {
     digitalWrite(MOTL_DIR, HIGH);
@@ -102,34 +95,21 @@ void ctl_set_motor_speed(const float speed_left_f32,
     pace_f32 = 1.0f / speed_f32;
     pol_ticks_f32 = pace_f32 * pace2ticksperpol_f32;
 
-    // Compute required number of overflows and  
-    // the timer compare value
-    timer_val_f32 = pol_ticks_f32 * uint16_max_inv_f32;
-    motl_ovf_tgt_ui32 = (uint32_t)floor(timer_val_f32);
-    timer_val_f32 = fmod(pol_ticks_f32, uint16_max_f32);
-    motl_timer_val_ui16 = (uint16_t)timer_val_f32;
-
 #if 1
     Serial.print("Speed update: speed_f32 ");
     Serial.print(speed_f32);
     Serial.print(", pol ticks tgt ");
     Serial.print(pol_ticks_f32);
-    Serial.print(", timer val (f32) ");
-    Serial.print(timer_val_f32);
-    Serial.print(", timer val (uint16) ");
-    Serial.print(motl_timer_val_ui16);
-    Serial.print(", ovf tgt ");
-    Serial.print(motl_ovf_tgt_ui32);
     Serial.println(".");
 #endif
   }
   else {
-    digitalWrite(MOTL_STEP, LOW);
+    digitalWrite(MOTL_STEP_PIN, LOW);
     Serial.print("Left motor is stopped (current pos ");
-    Serial.print((float)(motl_pulse_count_i32 >> 4) * 1.8f);
+    Serial.print((float)(motl_pulse_count_i32 >> 3) * 1.8f);
     Serial.println(" deg).");
     Serial.print("Right motor is stopped (current pos ");
-    Serial.print((float)(motr_pulse_count_i32 >> 4) * 1.8f);
+    Serial.print((float)(motr_pulse_count_i32 >> 3) * 1.8f);
     Serial.println(" deg).");
   }    
 
@@ -141,24 +121,15 @@ void ctl_set_motor_speed(const float speed_left_f32,
     digitalWrite(MOT_NSLEEP, HIGH);
   }
   // Pause timer to update values
-  sreg = SREG;
-
-  cli();
-  TCCR1B = 0x00;
-
-  OCR1A = motl_timer_val_ui16;
-  OCR1B = motr_timer_val_ui16;
-
-  motl.num_ovf_tgt_ui32 = motl_ovf_tgt_ui32;
-  motr.num_ovf_tgt_ui32 = motr_ovf_tgt_ui32;
+  TIMER1_DOWN;
 
   motl.pol_ticks_ui32 = (uint32_t)pol_ticks_f32;
-  motr.pol_ticks_ui32 = (uint32_t)pol_ticks_f32; // TODO: INVALID; manage right motor
+  next_compare_val_ui32 = (uint32_t)TCNT1;
+  next_compare_val_ui32 += motl.pol_ticks_ui32;
+  motl.num_ovf_tgt_ui32 = (next_compare_val_ui32 > 0? (next_compare_val_ui32 - 1): 0U) >> 16;
+  OCR1A = next_compare_val_ui32 - (motl.num_ovf_tgt_ui32 << 16);
 
-  TCCR1B = 0x01; 
-
-  sei();
-  SREG = sreg;
+  TIMER1_UP;
 }
 void ctl_reset_motor_pos() {
   motl_pulse_count_i32 = 0;
@@ -182,7 +153,12 @@ ISR(TIMER1_COMPA_vect)
      (motl_dir_cur_i32 != 0)) {
     // Toggle output pin and reset the overflow counter
     motl.pulse_pol_cur_b = !motl.pulse_pol_cur_b;
-    digitalWrite(MOTL_STEP, motl.pulse_pol_cur_b);
+    if(motl.pulse_pol_cur_b) {
+      PORTB |= MOTL_STEP_SET_ORMASK;
+    }
+    else {
+      PORTB &= MOTL_STEP_CLR_ANDMASK;
+    }
     motl.num_ovf_cur_ui32 = 0U;
 
     // Update the pulse count on low to high transition
@@ -190,17 +166,22 @@ ISR(TIMER1_COMPA_vect)
       motl_pulse_count_i32 += motl_dir_cur_i32;
     }
     // Compute next transition
-    uint32_t next_compare_val_ui32 = OCR1A + motl.pol_ticks_ui32;
-    motl.num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
-    OCR1A = next_compare_val_ui32 - motl.num_ovf_tgt_ui32;
+    uint32_t next_compare_val_ui32 = (uint32_t)TCNT1;
+    next_compare_val_ui32 += motl.pol_ticks_ui32;
+    motl.num_ovf_tgt_ui32 = (next_compare_val_ui32 > 0? (next_compare_val_ui32 - 1): 0U) >> 16;
+    OCR1A = next_compare_val_ui32 - (motl.num_ovf_tgt_ui32 << 16);
   }       
 }
 
 // Interrupt service run when Timer/Counter1 reaches OCR1B
 ISR(TIMER1_COMPB_vect) 
 {   
-  ++motr_pulse_count_i32;
-    motr.pulse_pol_cur_b = !motr.pulse_pol_cur_b;
-    digitalWrite(MOTR_STEP, motr.pulse_pol_cur_b);
-       
+  motr.pulse_pol_cur_b = !motr.pulse_pol_cur_b;
+  if(motr.pulse_pol_cur_b) {
+    PORTB |= MOTR_STEP_SET_ORMASK;
+    ++motr_pulse_count_i32;
+  }
+  else {
+    PORTB &= MOTR_STEP_CLR_ANDMASK;
+  }
 }

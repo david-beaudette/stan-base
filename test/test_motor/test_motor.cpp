@@ -32,11 +32,11 @@ void test_motor_speed(void) {
   t_ini = micros();
   t_cur = t_ini;
   while((t_cur - t_ini) <= spin_duration) {
-    digitalWrite(MOTL_STEP, HIGH);
-    digitalWrite(MOTR_STEP, HIGH);
+    digitalWrite(MOTL_STEP_PIN, HIGH);
+    digitalWrite(MOTR_STEP_PIN, HIGH);
     delayMicroseconds(delays[dly_idx]);
-    digitalWrite(MOTL_STEP, LOW);
-    digitalWrite(MOTR_STEP, LOW);
+    digitalWrite(MOTL_STEP_PIN, LOW);
+    digitalWrite(MOTR_STEP_PIN, LOW);
     delayMicroseconds(delays[dly_idx]);
     t_cur = micros();
   }
@@ -67,13 +67,13 @@ void setup() {
 
   pinMode(MOTL_DIR, OUTPUT);
   pinMode(MOTR_DIR, OUTPUT);
-  pinMode(MOTL_STEP, OUTPUT);
-  pinMode(MOTR_STEP, OUTPUT);
+  pinMode(MOTL_STEP_PIN, OUTPUT);
+  pinMode(MOTR_STEP_PIN, OUTPUT);
 
   digitalWrite(MOTL_DIR, LOW);
   digitalWrite(MOTR_DIR, HIGH);
-  digitalWrite(MOTL_STEP, LOW);
-  digitalWrite(MOTR_STEP, LOW);
+  digitalWrite(MOTL_STEP_PIN, LOW);
+  digitalWrite(MOTR_STEP_PIN, LOW);
 
   RUN_TEST(test_bat_level);
   for(dly_idx = 0; dly_idx < NUM_DELAYS; ++dly_idx) {

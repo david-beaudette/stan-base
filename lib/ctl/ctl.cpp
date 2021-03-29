@@ -151,6 +151,12 @@ ISR(TIMER1_COMPA_vect)
   // Check if desired period has elapsed and motor is running
   if((motl.num_ovf_cur_ui32 >= motl.num_ovf_tgt_ui32) &&
      (motl_dir_cur_i32 != 0)) {
+    // Compute next transition
+    uint32_t next_compare_val_ui32 = (uint32_t)OCR1A;
+    next_compare_val_ui32 += motl.pol_ticks_ui32 - 5;
+    motl.num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
+    OCR1A = next_compare_val_ui32 - (motl.num_ovf_tgt_ui32 << 16);
+
     // Toggle output pin and reset the overflow counter
     motl.pulse_pol_cur_b = !motl.pulse_pol_cur_b;
     if(motl.pulse_pol_cur_b) {
@@ -159,17 +165,11 @@ ISR(TIMER1_COMPA_vect)
     else {
       PORTB &= MOTL_STEP_CLR_ANDMASK;
     }
-    motl.num_ovf_cur_ui32 = 0U;
-
     // Update the pulse count on low to high transition
     if(motl.pulse_pol_cur_b) {
       motl_pulse_count_i32 += motl_dir_cur_i32;
     }
-    // Compute next transition
-    uint32_t next_compare_val_ui32 = (uint32_t)TCNT1;
-    next_compare_val_ui32 += motl.pol_ticks_ui32;
-    motl.num_ovf_tgt_ui32 = (next_compare_val_ui32 > 0? (next_compare_val_ui32 - 1): 0U) >> 16;
-    OCR1A = next_compare_val_ui32 - (motl.num_ovf_tgt_ui32 << 16);
+    motl.num_ovf_cur_ui32 = 0U;
   }       
 }
 

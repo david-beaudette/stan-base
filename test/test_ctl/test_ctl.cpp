@@ -19,10 +19,10 @@ void test_motor_speed(void) {
   ctl_set_motor_speed(0.0, 0.0f);
   delay(500);
 
-  // Speed below 1 counter overflow (close to max speed)
+  // Speed below 1 counter overflow
   ctl_reset_motor_pos();
-  ctl_set_motor_speed(32.5f, 0.0f);
-  delay(1000);
+  ctl_set_motor_speed(0.45f, 0.0f);
+  delay(5000);
 
   ctl_set_motor_speed(0.0, 0.0f);
   delay(500);

@@ -1,14 +1,8 @@
-#include "ctl.h"
 
 #include "Arduino.h"
+#include "ctl.h"
 
 uint32_t overflow_count_ui32 = 0U;
-
-int32_t motl_pulse_count_i32 = 0;
-int32_t motr_pulse_count_i32 = 0;
-
-int32_t motl_dir_cur_i32 = 0;
-int32_t motr_dir_cur_i32 = 0;
 
 const float clocktickspersec_f32 = (float)F_CPU;
 const float wheelradperstep_f32 = TWO_PI / 200.0f;
@@ -37,8 +31,8 @@ void ctl_init() {
   OCR1A = 0U;
   OCR2A = 0U;
 
-  // Enable output compare and overflow interrupts
-  TIMSK1 = B00000111;
+  // Enable output compare interrupts
+  TIMSK1 = B00000110;
 
   // Set timer to operate in normal mode
   TCCR1A = 0x00; 
@@ -51,40 +45,50 @@ void ctl_init() {
 
   // Setup motor control pins
   pinMode(MOTL_STEP_PIN,  OUTPUT);
-  pinMode(MOTL_DIR,   OUTPUT);
+  pinMode(MOTL_DIR,       OUTPUT);
   pinMode(MOTR_STEP_PIN,  OUTPUT);
-  pinMode(MOTR_DIR,   OUTPUT);
-  pinMode(MOT_NSLEEP, OUTPUT);
+  pinMode(MOTR_DIR,       OUTPUT);
+  pinMode(MOT_NSLEEP,     OUTPUT);
 
   digitalWrite(MOTL_STEP_PIN,  LOW);
-  digitalWrite(MOTL_DIR,   HIGH);
+  digitalWrite(MOTL_DIR,       HIGH);
   digitalWrite(MOTR_STEP_PIN,  LOW);
-  digitalWrite(MOTR_DIR,   LOW);
+  digitalWrite(MOTR_DIR,       LOW);
 
   // Always start in sleep mode
   digitalWrite(MOT_NSLEEP, LOW);
+
+  // Set step pin manipulation masks
+  motl.clrandmask_cst_ui8 = MOTL_STEP_CLR_AND_MASK;
+  motr.clrandmask_cst_ui8 = MOTR_STEP_CLR_AND_MASK;
+  motl.setormask_cst_ui8  = MOTL_STEP_SET_OR_MASK;
+  motr.setormask_cst_ui8  = MOTR_STEP_SET_OR_MASK;
 }
 
 void ctl_set_motor_speed(const float speed_left_f32, 
                          const float speed_right_f32) {
   float speed_f32 = 0.0f;
-  float pace_f32 = INFINITY;
-  float pol_ticks_f32 = INFINITY;
+  float pace_f32 = 0.0f;
+  float pol_ticks_f32 = 0.0f;
   uint32_t next_compare_val_ui32;
-  bool motl_stopped_b = true;
+  uint32_t num_ovf_tgt_ui32;
+  bool motl_stopped_b;
+  bool motr_stopped_b = true;
 
   if(speed_left_f32 > speed_min_pos_f32) {
     digitalWrite(MOTL_DIR, HIGH);
-    motl_dir_cur_i32 = 1;
+    motl.dir_cur_i32 = 1;
     motl_stopped_b = false;
   }
   else if(speed_left_f32 < speed_min_neg_f32) {
     digitalWrite(MOTL_DIR, LOW);
-    motl_dir_cur_i32 = -1;
+    motl.dir_cur_i32 = -1;
     motl_stopped_b = false;
   }
   else {
-    motl_dir_cur_i32 = 0;
+    motl.dir_cur_i32 = 0;
+    PORTB &= motl.clrandmask_cst_ui8;
+    motl_stopped_b = true;
   }
   if(!motl_stopped_b) {
     // Limit to maximum speed
@@ -102,75 +106,98 @@ void ctl_set_motor_speed(const float speed_left_f32,
     Serial.print(pol_ticks_f32);
     Serial.println(".");
 #endif
+    // Pause timer to update values
+    TIMER1_DOWN;
+
+    motl.pol_ticks_tgt_ui32 = (uint32_t)pol_ticks_f32;
+    if(motl.pol_ticks_cur_ui32 >=  motl.pol_ticks_tgt_ui32) {
+      // Pulse polarity change due now
+      ctl_toggle_motor_pin(&motl);
+    }
+
+    motl.timer_val_prev_ui16 = TCNT1;
+
+    next_compare_val_ui32 = (uint32_t)motl.timer_val_prev_ui16;
+    next_compare_val_ui32 += (motl.pol_ticks_tgt_ui32 - 
+                              motl.pol_ticks_cur_ui32);
+    num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
+    OCR1A = next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16);
+
+    TIMER1_UP;
   }
   else {
     digitalWrite(MOTL_STEP_PIN, LOW);
     Serial.print("Left motor is stopped (current pos ");
-    Serial.print((float)(motl_pulse_count_i32 >> 3) * 1.8f);
+    Serial.print((float)(motl.pulse_count_cur_i32 >> 3) * 1.8f);
     Serial.println(" deg).");
     Serial.print("Right motor is stopped (current pos ");
-    Serial.print((float)(motr_pulse_count_i32 >> 3) * 1.8f);
+    Serial.print((float)(motr.pulse_count_cur_i32 >> 3) * 1.8f);
     Serial.println(" deg).");
   }    
 
   // If none of the motors run, controller should sleep
-  if(motl_stopped_b && motl_stopped_b) {
+  if(motl_stopped_b && motr_stopped_b) {
     digitalWrite(MOT_NSLEEP, LOW);
   }
   else {
     digitalWrite(MOT_NSLEEP, HIGH);
   }
-  // Pause timer to update values
-  TIMER1_DOWN;
-
-  motl.pol_ticks_ui32 = (uint32_t)pol_ticks_f32;
-  next_compare_val_ui32 = (uint32_t)TCNT1;
-  next_compare_val_ui32 += motl.pol_ticks_ui32;
-  motl.num_ovf_tgt_ui32 = (next_compare_val_ui32 > 0? (next_compare_val_ui32 - 1): 0U) >> 16;
-  OCR1A = next_compare_val_ui32 - (motl.num_ovf_tgt_ui32 << 16);
-
-  TIMER1_UP;
 }
+
 void ctl_reset_motor_pos() {
-  motl_pulse_count_i32 = 0;
-  motr_pulse_count_i32 = 0;
+  motl.pulse_count_cur_i32 = 0;
+  motr.pulse_count_cur_i32 = 0;
 }
 
-// Interrupt service run when Timer/Counter1 OVERFLOW
-ISR(TIMER1_OVF_vect) { 
-  ++overflow_count_ui32; 
-
-  // Count overflows for each motor
-  ++motl.num_ovf_cur_ui32; 
-  ++motr.num_ovf_cur_ui32; 
+void ctl_toggle_motor_pin(MotorPulse *mot) {
+  mot->pol_ticks_cur_ui32 = 0U;
+  mot->pulse_pol_cur_b = !mot->pulse_pol_cur_b;
+  if(mot->pulse_pol_cur_b) {
+    PORTB |= mot->setormask_cst_ui8;
+  }
+  else {
+    PORTB &= mot->clrandmask_cst_ui8;
+  }
+  // Update the pulse count on low to high transition
+  if(mot->pulse_pol_cur_b) {
+    mot->pulse_count_cur_i32 += mot->dir_cur_i32;
+  }
 }
 
 // Interrupt service run when Timer/Counter1 reaches OCR1A
 ISR(TIMER1_COMPA_vect) 
 {   
-  // Check if desired period has elapsed and motor is running
-  if((motl.num_ovf_cur_ui32 >= motl.num_ovf_tgt_ui32) &&
-     (motl_dir_cur_i32 != 0)) {
-    // Compute next transition
-    uint32_t next_compare_val_ui32 = (uint32_t)OCR1A;
-    next_compare_val_ui32 += motl.pol_ticks_ui32 - 5;
-    motl.num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
-    OCR1A = next_compare_val_ui32 - (motl.num_ovf_tgt_ui32 << 16);
+  uint16_t timer_val_cur_ui16 = OCR1A;
+  uint32_t next_compare_val_ui32;
+  uint32_t num_ovf_tgt_ui32;
 
-    // Toggle output pin and reset the overflow counter
-    motl.pulse_pol_cur_b = !motl.pulse_pol_cur_b;
-    if(motl.pulse_pol_cur_b) {
-      PORTB |= MOTL_STEP_SET_ORMASK;
+  if(motl.dir_cur_i32 != 0) {
+    // Compute time since last period check
+    if(motl.timer_val_prev_ui16 >= timer_val_cur_ui16) {
+      motl.pol_ticks_cur_ui32 += (uint32_t)((UINT16_MAX -
+                                             motl.timer_val_prev_ui16) + 
+                                             timer_val_cur_ui16 + 1U);
     }
     else {
-      PORTB &= MOTL_STEP_CLR_ANDMASK;
+      motl.pol_ticks_cur_ui32 += (uint32_t)(timer_val_cur_ui16 - 
+                                            motl.timer_val_prev_ui16);
     }
-    // Update the pulse count on low to high transition
-    if(motl.pulse_pol_cur_b) {
-      motl_pulse_count_i32 += motl_dir_cur_i32;
+    motl.timer_val_prev_ui16 = timer_val_cur_ui16;
+
+    // Check if desired period has elapsed and motor is running
+    if(motl.pol_ticks_cur_ui32 >= motl.pol_ticks_tgt_ui32) {
+      // Pulse polarity change due now
+      ctl_toggle_motor_pin(&motl);
     }
-    motl.num_ovf_cur_ui32 = 0U;
-  }       
+    next_compare_val_ui32 = (uint32_t)motl.timer_val_prev_ui16;
+    next_compare_val_ui32 += (motl.pol_ticks_tgt_ui32 - 
+                              motl.pol_ticks_cur_ui32);
+    num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
+    OCR1A = next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16);
+  }
+  else {
+    PORTB &= motl.clrandmask_cst_ui8;
+  }
 }
 
 // Interrupt service run when Timer/Counter1 reaches OCR1B
@@ -178,10 +205,10 @@ ISR(TIMER1_COMPB_vect)
 {   
   motr.pulse_pol_cur_b = !motr.pulse_pol_cur_b;
   if(motr.pulse_pol_cur_b) {
-    PORTB |= MOTR_STEP_SET_ORMASK;
-    ++motr_pulse_count_i32;
+    PORTB |= motr.setormask_cst_ui8;
+    ++motr.pulse_count_cur_i32;
   }
   else {
-    PORTB &= MOTR_STEP_CLR_ANDMASK;
+    PORTB &= motr.clrandmask_cst_ui8;
   }
 }

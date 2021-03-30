@@ -2,8 +2,6 @@
 #include "Arduino.h"
 #include "ctl.h"
 
-uint32_t overflow_count_ui32 = 0U;
-
 const float clocktickspersec_f32 = (float)F_CPU;
 const float wheelradperstep_f32 = TWO_PI / 200.0f;
 const float motorstepsperpulse_f32 = 1.0 / 8.0f;
@@ -20,8 +18,8 @@ const float speed_max_f32 = 5.23 * TWO_PI; // 5.23 rev/s
 const float uint16_max_f32 = (float)UINT16_MAX;
 const float uint16_max_inv_f32 = 1.0f / uint16_max_f32;
 
-MotorPulse motl = {0};
-MotorPulse motr = {0};
+volatile MotorPulse motl = {0};
+volatile MotorPulse motr = {0};
 
 void ctl_init() {
   // Disable interrupts globally
@@ -99,13 +97,7 @@ void ctl_set_motor_speed(const float speed_left_f32,
     pace_f32 = 1.0f / speed_f32;
     pol_ticks_f32 = pace_f32 * pace2ticksperpol_f32;
 
-#if 1
-    Serial.print("Speed update: speed_f32 ");
-    Serial.print(speed_f32);
-    Serial.print(", pol ticks tgt ");
-    Serial.print(pol_ticks_f32);
-    Serial.println(".");
-#endif
+
     // Pause timer to update values
     TIMER1_DOWN;
 
@@ -113,6 +105,7 @@ void ctl_set_motor_speed(const float speed_left_f32,
     if(motl.pol_ticks_cur_ui32 >=  motl.pol_ticks_tgt_ui32) {
       // Pulse polarity change due now
       ctl_toggle_motor_pin(&motl);
+      motl.pol_ticks_cur_ui32 = 0U;
     }
 
     motl.timer_val_prev_ui16 = TCNT1;
@@ -123,6 +116,26 @@ void ctl_set_motor_speed(const float speed_left_f32,
     num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
     OCR1A = next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16);
 
+#if 1
+    Serial.print("Speed update:\n");
+    Serial.print("  speed_f32          ");
+    Serial.println(speed_f32);
+    Serial.print("  pol ticks tgt (f32) ");
+    Serial.println(pol_ticks_f32);
+    Serial.print("  pol ticks tgt       ");
+    Serial.println(motl.pol_ticks_tgt_ui32);
+    Serial.print("  pol ticks cur       ");
+    Serial.println(motl.pol_ticks_cur_ui32);
+    Serial.print("  current timer value ");
+    Serial.println(motl.timer_val_prev_ui16);
+    Serial.print("  next compare value  ");
+    Serial.println(next_compare_val_ui32);
+    Serial.print("  num overflows       ");
+    Serial.println(num_ovf_tgt_ui32);
+    Serial.print("  OCR1A value         ");
+    Serial.println(OCR1A);
+    Serial.println(" ");
+#endif
     TIMER1_UP;
   }
   else {
@@ -133,6 +146,7 @@ void ctl_set_motor_speed(const float speed_left_f32,
     Serial.print("Right motor is stopped (current pos ");
     Serial.print((float)(motr.pulse_count_cur_i32 >> 3) * 1.8f);
     Serial.println(" deg).");
+    motl.pol_ticks_cur_ui32 = UINT32_MAX;
   }    
 
   // If none of the motors run, controller should sleep
@@ -149,7 +163,7 @@ void ctl_reset_motor_pos() {
   motr.pulse_count_cur_i32 = 0;
 }
 
-void ctl_toggle_motor_pin(MotorPulse *mot) {
+void ctl_toggle_motor_pin(volatile MotorPulse *mot) {
   mot->pol_ticks_cur_ui32 = 0U;
   mot->pulse_pol_cur_b = !mot->pulse_pol_cur_b;
   if(mot->pulse_pol_cur_b) {

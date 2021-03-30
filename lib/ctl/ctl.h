@@ -44,7 +44,7 @@ void ctl_set_motor_speed(const float speed_left,
 
 void ctl_reset_motor_pos();
 
-void ctl_toggle_motor_pin(MotorPulse *mot);
+void ctl_toggle_motor_pin(volatile MotorPulse *mot);
 
 
 #endif // CTL_H

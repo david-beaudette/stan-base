@@ -68,8 +68,8 @@ void ctl_set_motor_speed(const float speed_left_f32,
   float speed_f32 = 0.0f;
   float pace_f32 = 0.0f;
   float pol_ticks_f32 = 0.0f;
-  uint32_t next_compare_val_ui32;
-  uint32_t num_ovf_tgt_ui32;
+  volatile uint32_t next_compare_val_ui32;
+  volatile uint32_t num_ovf_tgt_ui32;
   bool motl_stopped_b;
   bool motr_stopped_b = true;
 

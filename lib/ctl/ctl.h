@@ -29,6 +29,7 @@
 struct MotorPulse {
   uint32_t pol_ticks_cur_ui32;
   uint16_t timer_val_prev_ui16;
+  uint16_t cmp_val_cur_ui16;
   uint32_t pol_ticks_tgt_ui32;
   int32_t pulse_count_cur_i32;
   int32_t dir_cur_i32;

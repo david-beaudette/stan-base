@@ -101,6 +101,9 @@ void ctl_set_motor_speed(const float speed_left_f32,
     // Pause timer to update values
     TIMER1_DOWN;
 
+    // Clear pending interrupts
+    TIFR1 = 0XFF;
+
     motl.pol_ticks_tgt_ui32 = (uint32_t)pol_ticks_f32;
     if(motl.pol_ticks_cur_ui32 >=  motl.pol_ticks_tgt_ui32) {
       // Pulse polarity change due now
@@ -114,9 +117,10 @@ void ctl_set_motor_speed(const float speed_left_f32,
     next_compare_val_ui32 += (motl.pol_ticks_tgt_ui32 - 
                               motl.pol_ticks_cur_ui32);
     num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
-    OCR1A = next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16);
+    motl.cmp_val_cur_ui16 = (uint16_t)(next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16));
+    OCR1A = motl.cmp_val_cur_ui16;
 
-#if 1
+#if 0
     Serial.print("Speed update:\n");
     Serial.print("  speed_f32          ");
     Serial.println(speed_f32);
@@ -134,6 +138,8 @@ void ctl_set_motor_speed(const float speed_left_f32,
     Serial.println(num_ovf_tgt_ui32);
     Serial.print("  OCR1A value         ");
     Serial.println(OCR1A);
+    Serial.print("  TIMSK value         ");
+    Serial.println(TIMSK1);
     Serial.println(" ");
 #endif
     TIMER1_UP;
@@ -181,22 +187,21 @@ void ctl_toggle_motor_pin(volatile MotorPulse *mot) {
 // Interrupt service run when Timer/Counter1 reaches OCR1A
 ISR(TIMER1_COMPA_vect) 
 {   
-  uint16_t timer_val_cur_ui16 = OCR1A;
   uint32_t next_compare_val_ui32;
   uint32_t num_ovf_tgt_ui32;
 
   if(motl.dir_cur_i32 != 0) {
     // Compute time since last period check
-    if(motl.timer_val_prev_ui16 >= timer_val_cur_ui16) {
-      motl.pol_ticks_cur_ui32 += (uint32_t)((UINT16_MAX -
-                                             motl.timer_val_prev_ui16) + 
-                                             timer_val_cur_ui16 + 1U);
+    if(motl.timer_val_prev_ui16 >= motl.cmp_val_cur_ui16) {
+      motl.pol_ticks_cur_ui32 += ((uint32_t)UINT16_MAX -
+                                  (uint32_t)motl.timer_val_prev_ui16) + 
+                                 ((uint32_t)motl.cmp_val_cur_ui16 + 1U);
     }
     else {
-      motl.pol_ticks_cur_ui32 += (uint32_t)(timer_val_cur_ui16 - 
-                                            motl.timer_val_prev_ui16);
+      motl.pol_ticks_cur_ui32 += (uint32_t)motl.cmp_val_cur_ui16 - 
+                                 (uint32_t)motl.timer_val_prev_ui16;
     }
-    motl.timer_val_prev_ui16 = timer_val_cur_ui16;
+    motl.timer_val_prev_ui16 = motl.cmp_val_cur_ui16;
 
     // Check if desired period has elapsed and motor is running
     if(motl.pol_ticks_cur_ui32 >= motl.pol_ticks_tgt_ui32) {
@@ -207,7 +212,8 @@ ISR(TIMER1_COMPA_vect)
     next_compare_val_ui32 += (motl.pol_ticks_tgt_ui32 - 
                               motl.pol_ticks_cur_ui32);
     num_ovf_tgt_ui32 = next_compare_val_ui32 >> 16;
-    OCR1A = next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16);
+    motl.cmp_val_cur_ui16 = (uint16_t)(next_compare_val_ui32 - (num_ovf_tgt_ui32 << 16));
+    OCR1A = motl.cmp_val_cur_ui16;
   }
   else {
     PORTB &= motl.clrandmask_cst_ui8;

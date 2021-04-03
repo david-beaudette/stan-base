@@ -19,7 +19,7 @@ unsigned int delays[NUM_DELAYS] = {
 };
 
 unsigned long spin_duration = 1000000U;
-unsigned int wait_duration = 100000U;
+unsigned int wait_duration = 65535U;
 
 int dly_idx;
 

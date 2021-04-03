@@ -78,10 +78,15 @@ void ctl_init() {
 void ctl_set_motor_speed(const float speed_left_f32, 
                          const float speed_right_f32) {
   
+  // Pause timer to update values
+  TIMER1_DOWN;
+
   bool motl_stopped_b = ctl_set_single_motor_speed(&motl,
                                                    speed_left_f32);
   bool motr_stopped_b = ctl_set_single_motor_speed(&motr,
                                                    speed_right_f32);
+                                                   
+  TIMER1_UP;
 
   // If none of the motors run, controller should sleep
   if(motl_stopped_b && motr_stopped_b) {
@@ -131,9 +136,6 @@ bool ctl_set_single_motor_speed(volatile MotorPulse *mot,
     pace_f32 = 1.0f / abs_speed_f32;
     pol_ticks_f32 = pace_f32 * pace2ticksperpol_f32;
 
-    // Pause timer to update values
-    TIMER1_DOWN;
-
     mot->pol_ticks_tgt_ui32 = (uint32_t)pol_ticks_f32;
     if(mot->pol_ticks_cur_ui32 >=  mot->pol_ticks_tgt_ui32) {
       // Pulse polarity change due now
@@ -153,7 +155,7 @@ bool ctl_set_single_motor_speed(volatile MotorPulse *mot,
 
 #if 0
     Serial.print("Speed update:\n");
-    Serial.print("  abs_speed_f32          ");
+    Serial.print("  abs_speed_f32       ");
     Serial.println(abs_speed_f32);
     Serial.print("  pol ticks tgt (f32) ");
     Serial.println(pol_ticks_f32);
@@ -171,9 +173,8 @@ bool ctl_set_single_motor_speed(volatile MotorPulse *mot,
     Serial.println(_SFR_MEM16(mot->compare_register_ui8));
     Serial.println(" ");
 #endif
-    TIMER1_UP;
   }
- return mot_stopped_b;  
+  return mot_stopped_b;  
 }
 
 void ctl_reset_motor_pos() {

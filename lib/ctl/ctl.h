@@ -39,6 +39,7 @@ struct MotorPulse {
   uint32_t pol_ticks_tgt_ui32;
   int32_t pulse_count_cur_i32;
   int32_t dir_cur_i32;
+  int32_t dir_sign_i32;
   byte step_clrandmask_cst_ui8;
   byte step_setormask_cst_ui8;
   byte dir_clrandmask_cst_ui8;

@@ -19,14 +19,14 @@ float motr_speed_list[NUM_SPEED_VALUES] = {-40.0f, -0.256f,  0.45f,   0.064f};
 float motl_expected_rev_list[NUM_SPEED_VALUES] = {
   5.2294E+0f,
   71.6086E-3f,
- -40.7378E-3f,
- -10.1846E-3f,
+ -0.04125f,
+ -0.01f,
 };
 float motr_expected_rev_list[NUM_SPEED_VALUES] = {
  -5.2294E+0f,
- -40.7378E-3f,
+ -0.040625f,
   71.6086E-3f,
-  10.1846E-3f,
+  0.010625f,
 };
 
 void test_single_motor_speed(int speed_idx) {
@@ -54,8 +54,8 @@ void test_single_motor_speed(int speed_idx) {
   Serial.print(num_rev_right);
   Serial.println(" turns).");
   Serial.println(" ");
-  //TEST_ASSERT_FLOAT_WITHIN(motr_expected_rev_list[speed_idx] * 0.1f, 
-  //                         motr_expected_rev_list[speed_idx], num_rev_right);
+  TEST_ASSERT_FLOAT_WITHIN(motr_expected_rev_list[speed_idx] * 0.01f, 
+                           motr_expected_rev_list[speed_idx], num_rev_right);
 }
 
 void test_all_motor_speed(void) {

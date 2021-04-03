@@ -66,9 +66,12 @@ void ctl_init() {
   motl.dir_setormask_cst_ui8  = MOTL_DIR_SET_OR_MASK;
   motr.dir_setormask_cst_ui8  = MOTR_DIR_SET_OR_MASK;
 
+  motl.dir_sign_i32 =  1;
+  motr.dir_sign_i32 = -1;
+
   // Set compare register addresses
   motl.compare_register_ui8 = 0x88;
-  motr.compare_register_ui8 = 0xB3;
+  motr.compare_register_ui8 = 0x8A;
   
 }
 
@@ -99,21 +102,27 @@ bool ctl_set_single_motor_speed(volatile MotorPulse *mot,
   bool mot_stopped_b;
 
   if(speed_cmd_f32 > speed_min_pos_f32) {
-    PORTD |= mot->dir_setormask_cst_ui8;
-    mot->dir_cur_i32 = 1;
+    mot->dir_cur_i32 = mot->dir_sign_i32;
     mot_stopped_b = false;
   }
   else if(speed_cmd_f32 < speed_min_neg_f32) {
-    PORTD &= mot->dir_clrandmask_cst_ui8;
-    mot->dir_cur_i32 = -1;
+    mot->dir_cur_i32 = -mot->dir_sign_i32;
     mot_stopped_b = false;
   }
   else {
     mot->dir_cur_i32 = 0;
-    PORTB &= mot->step_clrandmask_cst_ui8;
     mot_stopped_b = true;
+    mot->pol_ticks_cur_ui32 = UINT32_MAX;
+    PORTB &= mot->step_clrandmask_cst_ui8;
   }
   if(!mot_stopped_b) {
+    // Set direction pin value
+    if(mot->dir_cur_i32 > 0) {
+      PORTD |= mot->dir_setormask_cst_ui8; 
+    }
+    else {
+      PORTD &= mot->dir_clrandmask_cst_ui8;
+    }
     // Limit to maximum speed
     abs_speed_f32 = fmin(fabs(speed_cmd_f32), speed_max_f32);
 
@@ -142,7 +151,7 @@ bool ctl_set_single_motor_speed(volatile MotorPulse *mot,
                                        (num_ovf_tgt_ui32 << 16));
     _SFR_MEM16(mot->compare_register_ui8) = mot->cmp_val_cur_ui16;
 
-#if 1
+#if 0
     Serial.print("Speed update:\n");
     Serial.print("  abs_speed_f32          ");
     Serial.println(abs_speed_f32);
@@ -158,17 +167,13 @@ bool ctl_set_single_motor_speed(volatile MotorPulse *mot,
     Serial.println(next_compare_val_ui32);
     Serial.print("  num overflows       ");
     Serial.println(num_ovf_tgt_ui32);
-    Serial.print("  OCR1A value         ");
+    Serial.print("  compare register    ");
     Serial.println(_SFR_MEM16(mot->compare_register_ui8));
     Serial.println(" ");
 #endif
     TIMER1_UP;
   }
-  else {
-    PORTB &= mot->step_clrandmask_cst_ui8;
-    mot->pol_ticks_cur_ui32 = UINT32_MAX;
-  }  
-  return mot_stopped_b;  
+ return mot_stopped_b;  
 }
 
 void ctl_reset_motor_pos() {
@@ -179,8 +184,8 @@ void ctl_reset_motor_pos() {
 void ctl_get_motor_num_rev(float &motl_num_rev_f32, 
                            float &motr_num_rev_f32) {
 
-  motl_num_rev_f32 = (float)(motl.pulse_count_cur_i32) * rev_per_step_f32;
-  motr_num_rev_f32 = (float)(motr.pulse_count_cur_i32) * rev_per_step_f32;
+  motl_num_rev_f32 = (float)(motl.pulse_count_cur_i32 * motl.dir_sign_i32) * rev_per_step_f32;
+  motr_num_rev_f32 = (float)(motr.pulse_count_cur_i32 * motr.dir_sign_i32) * rev_per_step_f32;
 }
 
 void ctl_motor_interrupt(volatile MotorPulse *mot) {

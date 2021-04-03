@@ -11,28 +11,31 @@
 // Project headers
 #include "nav.h"
 #include "ctl.h"
+#include "bat.h"
 
 void blink();
 void show();
 void gnc_task_run();
 
+float gnc_task_dt = 0.01f;
+
 Scheduler runner;
 
-Task gnc_task(5, TASK_FOREVER, &gnc_task_run);
-Task blink_task(1000, TASK_FOREVER, &blink);
-Task show_task(5000, TASK_FOREVER, &show);
+Task gnc_task((int)(gnc_task_dt * 1000.0f), TASK_FOREVER, &gnc_task_run);
+Task blink_task(500, TASK_FOREVER, &blink);
+Task show_task(1000, TASK_FOREVER, &show);
 
 // Health LED
 bool blinkState = false;
 
-float pitch_cur;
+float pitch_deg_f32 = 0.0f;
 
 void setup() {
 
   // Initialize serial communication
   Serial.begin(115200);
 
-  nav_init();
+  nav_init(gnc_task_dt);
   ctl_init();
   
   runner.init();
@@ -47,6 +50,12 @@ void setup() {
   blink_task.enable();
   show_task.enable();
   Serial.println("Enabled tasks.");
+
+  Serial.print("GNC task will run every ");
+  Serial.print(gnc_task.getInterval());
+  Serial.println(" ms.");
+
+  check_bat_level_verbose();
 }
 
 void loop() {
@@ -56,10 +65,16 @@ void loop() {
 void gnc_task_run() {
   // Update pitch measurement
   nav();
-  pitch_cur = nav_get_pitch();
+  pitch_deg_f32 = nav_get_pitch();
 
   // Update motor speed
-  ctl_set_motor_speed(1.0, -1.0);
+  if(fabs(pitch_deg_f32) > 2.0f) {
+    ctl_set_motor_speed(-pitch_deg_f32 * 0.5f, 
+                        -pitch_deg_f32 * 0.5f);
+  }
+  else {
+    ctl_set_motor_speed(0.0f, 0.0f);
+  }
 }
 
 void blink() {
@@ -73,7 +88,7 @@ void show() {
   Serial.print("count:\t");
   Serial.print((int)accel_isr_count);
   Serial.print("\tpitch:\t");
-  Serial.print(pitch_cur);
+  Serial.print(pitch_deg_f32);
   Serial.print("\tgyro:\t");
   Serial.print(gy);
   Serial.print("\taccel:\t");

@@ -24,7 +24,7 @@ void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy);
 
 float nav_get_pitch();
 
-bool nav_init();
+bool nav_init(float dt);
 
 void nav();
 

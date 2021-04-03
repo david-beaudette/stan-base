@@ -9,8 +9,8 @@
 
 // Complementary filter
 float pitch_acc;
-float acc_coeff = 0.02f;
-float gyr_coeff = 0.98f;
+float acc_coeff = 0.05f;
+float gyr_coeff = 1.0f - acc_coeff;
 float delta_t = 0.01f;
 
 // Accelerometer board from FIRST Robotics 2012
@@ -19,7 +19,6 @@ float delta_t = 0.01f;
 ADXL345 accel(ADXL345_ADDRESS_ALT_HIGH);
 
 float accel_isr_count = 0.0f;
-bool process_data_b = false;
 bool filter_init_b = false;
 
 int16_t ax, ay, az;
@@ -31,18 +30,12 @@ int16_t gy = 0;
 int16_t gy_bias = 0;  
 float gy_sum;  
 
-int16_t avg_len = 300;
+int16_t avg_len = 100;
 
-float pitch = 0.0f;
-
-// Accelerometer data ready interrupt
-void accel_isr() {
-  process_data_b = true;
-  return;
-}
+float _pitch_deg_f32 = 0.0f;
 
 float nav_get_pitch() {
-  return pitch;
+  return _pitch_deg_f32;
 }
 
 // One step of the pitch complementary filter
@@ -53,8 +46,12 @@ void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy) {
   pitch = gyr_coeff * pitch + acc_coeff * pitch_acc;
 }
 
-bool nav_init() {
-    // Join I2C bus (I2Cdev library doesn't do this automatically)
+bool nav_init(float dt) {
+
+  // Set function sample time
+  delta_t = dt;
+
+  // Join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
 
   // Initialize device
@@ -71,10 +68,7 @@ bool nav_init() {
 
   // Configure interrupt for accelerometer data ready
   pinMode(2, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(2), accel_isr, RISING);
-  accel.setIntDataReadyPin(0);
   accel.getAcceleration(&ax, &ay, &az);
-  accel.setIntDataReadyEnabled(true);
 
   // Reset the sensor measurements accumulators
   ay_sum = 0.0f;
@@ -86,14 +80,13 @@ bool nav_init() {
 
 void nav() {
 
-  if (process_data_b) {
+  if (digitalRead(2)) {
     // Read raw accel measurements from device
     accel.getAcceleration(&ax, &ay, &az);
     // Remove offsets (except for down-pointing X axis)
     ay -= ay_offset;
     az -= az_offset;
     accel_isr_count += 1.0f;
-    process_data_b = false;
     gy = analogRead(GYRO_PIN) - gy_bias;
 
     if (filter_init_b) {
@@ -101,7 +94,7 @@ void nav() {
       /  X points down
       /  Y points backward
       /  Z points left */
-      complementary_filter_step(pitch, -ay, -az, ax, gy);
+      complementary_filter_step(_pitch_deg_f32, -ay, -az, ax, gy);
     } else {
       // Find offset / bias
       gy_sum += (float)gy;

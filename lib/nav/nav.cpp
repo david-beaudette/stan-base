@@ -9,7 +9,7 @@
 
 // Complementary filter
 float pitch_acc;
-float acc_coeff = 0.05f;
+float acc_coeff = 0.025f;
 float gyr_coeff = 1.0f - acc_coeff;
 float delta_t = 0.01f;
 

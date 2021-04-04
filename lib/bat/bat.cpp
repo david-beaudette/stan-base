@@ -40,4 +40,5 @@ float bat_get_state_of_charge(void) {
   else if(soc_f32 < 0.0f) {
     soc_f32 = 0.0f;
   }
+  return soc_f32;
 }

@@ -12,6 +12,7 @@
 #include "nav.h"
 #include "ctl.h"
 #include "bat.h"
+#include "PID_v1.h"
 
 void blink();
 void show();
@@ -28,7 +29,14 @@ Task show_task(1000, TASK_FOREVER, &show);
 // Health LED
 bool blinkState = false;
 
-float pitch_deg_f32 = 0.0f;
+double pitch_cur_deg = 0.0;
+double pitch_tgt_deg = 0.0;
+double speed = 0.0;
+
+// Instantiate controller
+double Kp=2, Ki=0, Kd=0;
+PID ctl_pid(&pitch_cur_deg, &speed, &pitch_tgt_deg, 
+            Kp, Ki, Kd, DIRECT);
 
 void setup() {
 
@@ -37,6 +45,8 @@ void setup() {
 
   nav_init(gnc_task_dt);
   ctl_init();
+  ctl_pid.SetMode(AUTOMATIC);
+  ctl_pid.SetSampleTime(10);
   
   runner.init();
   Serial.println("Initialized scheduler.");
@@ -66,12 +76,13 @@ void loop() {
 void gnc_task_run() {
   // Update pitch measurement
   nav();
-  pitch_deg_f32 = nav_get_pitch();
+  pitch_cur_deg = nav_get_pitch();
+  ctl_pid.Compute();
 
   // Update motor speed
-  if(fabs(pitch_deg_f32) > 2.0f) {
-    ctl_set_motor_speed(-pitch_deg_f32 * 0.5f, 
-                        -pitch_deg_f32 * 0.5f);
+  if(fabs(pitch_cur_deg) > 0.3f) {
+    ctl_set_motor_speed(speed, 
+                        speed);
   }
   else {
     ctl_set_motor_speed(0.0f, 0.0f);
@@ -89,7 +100,7 @@ void show() {
   Serial.print("count:\t");
   Serial.print(accel_isr_count, 0);
   Serial.print("\tpitch:\t");
-  Serial.print(pitch_deg_f32);
+  Serial.print(pitch_cur_deg);
   Serial.print("\tgyro:\t");
   Serial.print(gy);
   Serial.print("\taccel:\t");

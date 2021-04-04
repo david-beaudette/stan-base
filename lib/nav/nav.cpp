@@ -68,7 +68,9 @@ bool nav_init(float dt) {
 
   // Configure interrupt for accelerometer data ready
   pinMode(2, INPUT_PULLUP);
+  accel.setIntDataReadyPin(0);
   accel.getAcceleration(&ax, &ay, &az);
+  accel.setIntDataReadyEnabled(true);
 
   // Reset the sensor measurements accumulators
   ay_sum = 0.0f;
@@ -80,7 +82,7 @@ bool nav_init(float dt) {
 
 void nav() {
 
-  if (digitalRead(2)) {
+  if(digitalRead(2)) {
     // Read raw accel measurements from device
     accel.getAcceleration(&ax, &ay, &az);
     // Remove offsets (except for down-pointing X axis)
@@ -89,7 +91,7 @@ void nav() {
     accel_isr_count += 1.0f;
     gy = analogRead(GYRO_PIN) - gy_bias;
 
-    if (filter_init_b) {
+    if(filter_init_b) {
       /* Axes are as follows:
       /  X points down
       /  Y points backward
@@ -117,6 +119,5 @@ void nav() {
       }
     }
   }
-  
   return;
 }

@@ -12,7 +12,9 @@
 #define BAT_PIN A6 
 #define BAT_LIM 867 // 25% of 3S LiPo -> 11.25 VDC 
 
-bool check_bat_level(void);
-bool check_bat_level_verbose(void);
+bool bat_check_level(void);
+void bat_show_voltage(void);
+void bat_show_state_of_charge(void);
+float bat_get_state_of_charge(void);
 
 #endif // BAT_H

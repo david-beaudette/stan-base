@@ -55,7 +55,8 @@ void setup() {
   Serial.print(gnc_task.getInterval());
   Serial.println(" ms.");
 
-  check_bat_level_verbose();
+  bat_show_state_of_charge();
+  bat_show_voltage();
 }
 
 void loop() {
@@ -86,7 +87,7 @@ void blink() {
 void show() {
   // Display tab-separated accel x/y/z values
   Serial.print("count:\t");
-  Serial.print((int)accel_isr_count);
+  Serial.print(accel_isr_count, 0);
   Serial.print("\tpitch:\t");
   Serial.print(pitch_deg_f32);
   Serial.print("\tgyro:\t");

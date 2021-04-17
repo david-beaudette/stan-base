@@ -13,6 +13,8 @@
 #include "ctl.h"
 #include "bat.h"
 #include "PID_v1.h"
+#include "Base2Head.hpp"
+#include "Head2Base.hpp"
 
 void blink();
 void show();

@@ -16,5 +16,7 @@ bool bat_check_level(void);
 void bat_show_voltage(void);
 void bat_show_state_of_charge(void);
 float bat_get_state_of_charge(void);
+float bat_get_voltage(void);
+float bat_get_last_voltage(void);
 
 #endif // BAT_H

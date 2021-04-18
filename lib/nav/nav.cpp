@@ -38,6 +38,10 @@ float nav_get_pitch() {
   return _pitch_deg_f32;
 }
 
+bool nav_get_filter_init() {
+  return filter_init_b;
+}
+
 // One step of the pitch complementary filter
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy) {
   long squaresum = (long)ay * ay + (long)az * az;

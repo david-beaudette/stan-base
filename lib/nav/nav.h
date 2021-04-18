@@ -23,6 +23,7 @@ extern float gy_sum;
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy);
 
 float nav_get_pitch();
+bool nav_get_filter_init();
 
 bool nav_init(float dt);
 

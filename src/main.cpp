@@ -46,6 +46,7 @@ uint8_t system_err_i = BASE_ERR_NONE;
 uint8_t seq_num_slow = 0U;
 uint8_t seq_num_fast = 0U;
 uint8_t seq_num_cmd = 255U;
+uint16_t num_bytes_written_prev = 0U;
 
 // Global variables
 double pitch_cur_deg = 0.0;
@@ -88,10 +89,12 @@ void setup()
   runner.addTask(gnc_task);
   runner.addTask(blink_task);
   runner.addTask(pub_slow_task);
+  runner.addTask(pub_fast_task);
 
   gnc_task.enable();
   blink_task.enable();
   pub_slow_task.enable();
+  pub_fast_task.enable();
 
   // Initialising filter
   system_status_i = BASE_STATUS_FILTINIT + BASE_ERR_NONE;
@@ -133,36 +136,52 @@ void gnc_task_run()
 
 void blink()
 {
-  // Blink LED to indicate activity
-  blinkState = !blinkState;
-  digitalWrite(LED_BUILTIN, blinkState);
 }
 
 void pub_slow()
 {
+  // Compute sequence number
+  if(seq_num_slow == UINT8_MAX) {
+    seq_num_slow = 0U;
+  }
+  else {
+    ++seq_num_slow;
+  }
+
   // Build message and send
   Base2HeadSlow msg;
   msg.forebyte = BASE2HEAD_FOREBYTE_SLOW;
-  msg.seq = seq_num_slow == 255U? 0U : ++seq_num_slow;
+  msg.seq = seq_num_slow;
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.batt_soc = bat_get_state_of_charge();
   msg.batt_volt = bat_get_last_voltage();
   msg.pitch_cmd = pitch_tgt_deg;
 
   Serial.write((uint8_t*)&msg, sizeof(msg));
+  // Blink LED to indicate activity
+  blinkState = !blinkState;
+  digitalWrite(LED_BUILTIN, blinkState);
 }
 
 void pub_fast()
 {
+  // Compute sequence number
+  if(seq_num_fast == UINT8_MAX) {
+    seq_num_fast = 0U;
+  }
+  else {
+    ++seq_num_fast;
+  }
+
   // Build message and send
   Base2HeadFast msg;
   msg.forebyte = BASE2HEAD_FOREBYTE_FAST;
-  msg.seq = seq_num_fast == 255U? 0U : ++seq_num_fast;
+  msg.seq = seq_num_fast;
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.acc_count = (uint32_t)accel_isr_count;
   msg.cam_pan_pct = 0.0f;
-  msg.cam_tilt_pct = 0.0f;
-  msg.pitch_ref = 0.0f;
+  msg.cam_tilt_pct = (float)sizeof(msg);
+  msg.pitch_ref = (float)num_bytes_written_prev;
   msg.pitch_est = pitch_cur_deg;
   msg.speed_cmd[0] = speed;
   msg.speed_cmd[1] = speed;
@@ -170,7 +189,7 @@ void pub_fast()
   msg.acc_y_mes = ay;
   msg.acc_z_mes = az;
   msg.w_mes = gy;
-  Serial.write((uint8_t*)&msg, sizeof(msg));
+  num_bytes_written_prev = Serial.write((uint8_t*)&msg, sizeof(msg));
 }
 
 void serial_error_cb(uint8_t err_num_i)

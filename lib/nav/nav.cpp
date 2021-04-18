@@ -59,16 +59,10 @@ bool nav_init(float dt) {
   Wire.begin();
 
   // Initialize device
-  Serial.println("Initializing I2C devices...");
   accel.initialize();
   accel.setRate(ADXL345_RATE_100);
   accel.setRange(ADXL345_RANGE_2G);
   accel.setFIFOMode(ADXL345_FIFO_MODE_BYPASS);
-
-  // Verify connection
-  Serial.println("Testing device connections...");
-  Serial.println(accel.testConnection() ? "ADXL345 connection successful"
-                                        : "ADXL345 connection failed");
 
   // Configure interrupt for accelerometer data ready
   pinMode(2, INPUT_PULLUP);
@@ -110,14 +104,7 @@ void nav() {
         ay_offset = (int16_t)(ay_sum / accel_isr_count);
         az_offset = (int16_t)(az_sum / accel_isr_count);
 
-        Serial.println("Accelerometer offsets (y, z):");
-        Serial.print(ay_sum / accel_isr_count);
-        Serial.print(", ");
-        Serial.println(az_sum / accel_isr_count);
-
         gy_bias = (int16_t)(gy_sum / accel_isr_count);
-        Serial.print("Gyroscope bias set to ");
-        Serial.println((gy_sum / accel_isr_count));
 
         filter_init_b = true;
       }

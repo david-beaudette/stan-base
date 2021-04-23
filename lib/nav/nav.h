@@ -21,9 +21,13 @@ extern float gy_sum;
 
 // One step of the pitch complementary filter
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy);
+void nav_set_filter_gain(float acc_coeff_upd);
+void nav_set_avg_len(float avg_len_upd);
 
 float nav_get_pitch();
+
 bool nav_get_filter_init();
+void nav_reset_filter();
 
 bool nav_init(float dt);
 

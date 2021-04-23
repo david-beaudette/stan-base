@@ -5,13 +5,14 @@
 
 #include "nav.h"
 
-#define GYRO_PIN A7 
+#define GYRO_PIN A7
 
 // Complementary filter
 float pitch_acc;
 float acc_coeff = 0.025f;
 float gyr_coeff = 1.0f - acc_coeff;
 float delta_t = 0.01f;
+float freq = 1.0f / delta_t;
 
 // Accelerometer board from FIRST Robotics 2012
 // http://www.team358.org/files/programming/ControlSystem2015-2019/specs/Accelerometer-Gyro.pdf
@@ -25,32 +26,66 @@ int16_t ax, ay, az;
 int16_t ay_offset, az_offset;
 float ay_sum, az_sum;
 
-// Gyroscope 
-int16_t gy = 0;  
-int16_t gy_bias = 0;  
-float gy_sum;  
+// Gyroscope
+int16_t gy = 0;
+int16_t gy_bias = 0;
+float gy_sum;
 
 int16_t avg_len = 100;
 
 float _pitch_deg_f32 = 0.0f;
 
-float nav_get_pitch() {
+float nav_get_pitch()
+{
   return _pitch_deg_f32;
 }
 
-bool nav_get_filter_init() {
+bool nav_get_filter_init()
+{
   return filter_init_b;
 }
 
+void nav_reset_filter()
+{
+  filter_init_b = false;
+  accel_isr_count = 0;
+  return;
+}
+
 // One step of the pitch complementary filter
-void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy) {
+void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy)
+{
   long squaresum = (long)ay * ay + (long)az * az;
   pitch += ((-gy / 32.8f) * (delta_t / 1000000.0f));
   pitch_acc = atan(ax / sqrt(squaresum)) * RAD_TO_DEG;
   pitch = gyr_coeff * pitch + acc_coeff * pitch_acc;
 }
 
-bool nav_init(float dt) {
+void nav_set_filter_gain(float acc_coeff_upd)
+{
+  acc_coeff = acc_coeff_upd;
+  gyr_coeff = 1.0f - acc_coeff;
+}
+
+void nav_set_avg_len(float avg_len_upd)
+{
+  float avg_len_count = avg_len_upd * freq;
+  if (avg_len_count < 0.0f)
+  {
+    avg_len = 0U;
+  }
+  else if (avg_len_count > (float)UINT16_MAX)
+  {
+    avg_len = UINT16_MAX;
+  }
+  else
+  {
+    avg_len = (uint16_t)avg_len_count;
+  }
+}
+
+bool nav_init(float dt)
+{
 
   // Set function sample time
   delta_t = dt;
@@ -73,14 +108,16 @@ bool nav_init(float dt) {
   // Reset the sensor measurements accumulators
   ay_sum = 0.0f;
   az_sum = 0.0f;
-  gy_sum = 0.0f;  
+  gy_sum = 0.0f;
 
   return accel.testConnection();
 }
 
-void nav() {
+void nav()
+{
 
-  if(digitalRead(2)) {
+  if (digitalRead(2))
+  {
     // Read raw accel measurements from device
     accel.getAcceleration(&ax, &ay, &az);
     // Remove offsets (except for down-pointing X axis)
@@ -89,18 +126,22 @@ void nav() {
     accel_isr_count += 1.0f;
     gy = analogRead(GYRO_PIN) - gy_bias;
 
-    if(filter_init_b) {
+    if (filter_init_b)
+    {
       /* Axes are as follows:
       /  X points down
       /  Y points backward
       /  Z points left */
       complementary_filter_step(_pitch_deg_f32, -ay, -az, ax, gy);
-    } else {
+    }
+    else
+    {
       // Find offset / bias
       gy_sum += (float)gy;
       ay_sum += (float)ay;
       az_sum += (float)az;
-      if(accel_isr_count >= avg_len) {
+      if (accel_isr_count >= avg_len)
+      {
         ay_offset = (int16_t)(ay_sum / accel_isr_count);
         az_offset = (int16_t)(az_sum / accel_isr_count);
 

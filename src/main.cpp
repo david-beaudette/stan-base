@@ -44,7 +44,7 @@ uint8_t system_status_i = BASE_STATUS_PREINIT;
 uint8_t system_err_i = BASE_ERR_NONE;
 uint8_t seq_num_slow = 0U;
 uint8_t seq_num_fast = 0U;
-uint8_t seq_num_cmd = 255U;
+uint8_t seq_recv_last = 255U;
 uint16_t num_bytes_written_prev = 0U;
 
 // Global variables
@@ -139,6 +139,9 @@ void gnc_task_run()
 
 void blink()
 {
+  // Blink LED to indicate activity
+  blinkState = !blinkState;
+  digitalWrite(LED_BUILTIN, blinkState);
 }
 
 void pub_slow()
@@ -157,15 +160,13 @@ void pub_slow()
   Base2HeadSlow msg;
   msg.forebyte = BASE2HEAD_FOREBYTE_SLOW;
   msg.seq = seq_num_slow;
+  msg.seq_recv_last = seq_recv_last;
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.batt_soc = bat_get_state_of_charge();
   msg.batt_volt = bat_get_last_voltage();
   msg.pitch_cmd = pitch_tgt_deg;
-
+  
   Serial.write((uint8_t *)&msg, sizeof(msg));
-  // Blink LED to indicate activity
-  blinkState = !blinkState;
-  digitalWrite(LED_BUILTIN, blinkState);
 }
 
 void pub_fast()
@@ -226,6 +227,7 @@ void serial_cmd_recv()
     // Interpret message if start of packet was found
     if (msg)
     {
+      seq_recv_last = msg->seq;
       // Check which command was received
       switch (msg->type)
       {
@@ -243,6 +245,9 @@ void serial_cmd_recv()
       case SetSpeed:
         break;
       case SetTurnRate:
+        break;
+      case LedBlinkRate:
+        blink_task.setInterval((unsigned long)(msg->val1 * 1000.0f));
         break;
       default:
         break;

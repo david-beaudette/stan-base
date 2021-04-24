@@ -8,7 +8,6 @@
 #define GYRO_PIN A7
 
 // Complementary filter
-float pitch_acc;
 float acc_coeff = 0.025f;
 float gyr_coeff = 1.0f - acc_coeff;
 float delta_t = 0.01f;
@@ -56,9 +55,16 @@ void nav_reset_filter()
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy)
 {
   long squaresum = (long)ay * ay + (long)az * az;
-  pitch += ((-gy / 32.8f) * (delta_t / 1000000.0f));
-  pitch_acc = atan(ax / sqrt(squaresum)) * RAD_TO_DEG;
-  pitch = gyr_coeff * pitch + acc_coeff * pitch_acc;
+  float pitch_gyr = ((-gy * 0.030487805f) * delta_t);
+  float pitch_acc = atan(ax / sqrt(squaresum)) * RAD_TO_DEG;
+
+  // Update pitch with measurements when valid
+  if(abs(pitch_gyr) <= 180.0f) {
+    pitch += pitch_gyr;
+  } 
+  if(abs(pitch_acc) <= 180.0f) {
+    pitch = gyr_coeff * pitch + acc_coeff * pitch_acc;
+  }
 }
 
 void nav_set_filter_gain(float acc_coeff_upd)
@@ -89,6 +95,7 @@ bool nav_init(float dt)
 
   // Set function sample time
   delta_t = dt;
+  freq = 1.0f / delta_t;
 
   // Join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();

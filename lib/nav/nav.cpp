@@ -12,6 +12,7 @@ float acc_coeff = 0.025f;
 float gyr_coeff = 1.0f - acc_coeff;
 float delta_t = 0.01f;
 float freq = 1.0f / delta_t;
+const float gyr_analog2degps = 5.0f / (1024.0f * 0.007f);
 
 // Accelerometer board from FIRST Robotics 2012
 // http://www.team358.org/files/programming/ControlSystem2015-2019/specs/Accelerometer-Gyro.pdf
@@ -55,8 +56,8 @@ void nav_reset_filter()
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy)
 {
   long squaresum = (long)ay * ay + (long)az * az;
-  float pitch_gyr = ((-gy * 0.030487805f) * delta_t);
-  float pitch_acc = atan(ax / sqrt(squaresum)) * RAD_TO_DEG;
+  float pitch_gyr = (((float)gy * gyr_analog2degps) * delta_t);
+  float pitch_acc = atan((float)ax / sqrt((float)squaresum)) * RAD_TO_DEG;
 
   // Update pitch with measurements when valid
   if(abs(pitch_gyr) <= 180.0f) {

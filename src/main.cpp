@@ -15,6 +15,7 @@
 #include "PID_v1.h"
 #include "Base2Head.hpp"
 #include "Head2Base.hpp"
+#include "fletcher_impl.hpp"
 
 // Function declaration
 void gnc_task_run();
@@ -45,6 +46,7 @@ uint8_t system_err_i = BASE_ERR_NONE;
 uint8_t seq_num_slow = 0U;
 uint8_t seq_num_fast = 0U;
 uint8_t seq_recv_last = 255U;
+uint16_t crc_error_count = 0U;
 uint16_t num_bytes_written_prev = 0U;
 
 // Global variables
@@ -161,11 +163,15 @@ void pub_slow()
   msg.forebyte = BASE2HEAD_FOREBYTE_SLOW;
   msg.seq = seq_num_slow;
   msg.seq_recv_last = seq_recv_last;
+  msg.crc_error_count = crc_error_count;
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.batt_soc = bat_get_state_of_charge();
   msg.batt_volt = bat_get_last_voltage();
   msg.pitch_cmd = pitch_tgt_deg;
-  
+  msg.crc = compute_fletcher16((uint8_t *)&msg,
+                               sizeof(Base2HeadSlow) -
+                                   sizeof(Head2BaseCommand::crc));
+
   Serial.write((uint8_t *)&msg, sizeof(msg));
 }
 
@@ -188,15 +194,19 @@ void pub_fast()
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.acc_count = (uint32_t)accel_isr_count;
   msg.cam_pan_pct = 0.0f;
-  msg.cam_tilt_pct = (float)sizeof(msg);
-  msg.pitch_ref = (float)num_bytes_written_prev;
+  msg.cam_tilt_pct = 0.0f;
+  msg.pitch_ref = pitch_tgt_deg;
   msg.pitch_est = pitch_cur_deg;
   msg.speed_cmd[0] = speed;
   msg.speed_cmd[1] = speed;
   msg.acc_x_mes = ax;
   msg.acc_y_mes = ay;
   msg.acc_z_mes = az;
-  msg.w_mes = gy;
+  msg.w_mes = gy * gyr_analog2degps;
+  msg.crc = compute_fletcher16((uint8_t *)&msg,
+                               sizeof(Base2HeadFast) -
+                                   sizeof(Head2BaseCommand::crc));
+
   num_bytes_written_prev = Serial.write((uint8_t *)&msg, sizeof(msg));
 }
 
@@ -228,29 +238,39 @@ void serial_cmd_recv()
     if (msg)
     {
       seq_recv_last = msg->seq;
-      // Check which command was received
-      switch (msg->type)
+      uint16_t crc = compute_fletcher16((uint8_t *)msg,
+                                        sizeof(Head2BaseCommand) -
+                                            sizeof(Head2BaseCommand::crc));
+
+      if (crc == msg->crc)
       {
-      case InitialiseFilter:
-        nav_set_filter_gain(msg->val1);
-        nav_set_avg_len(msg->val2);
-        nav_reset_filter();
-        break;
-      case PanTiltAbsCamera:
-        break;
-      case PanTiltRelCamera:
-        break;
-      case LevelCamera:
-        break;
-      case SetSpeed:
-        break;
-      case SetTurnRate:
-        break;
-      case LedBlinkRate:
-        blink_task.setInterval((unsigned long)(msg->val1 * 1000.0f));
-        break;
-      default:
-        break;
+        // Check which command was received
+        switch (msg->type)
+        {
+        case InitialiseFilter:
+          nav_set_filter_gain(msg->val1);
+          nav_set_avg_len(msg->val2);
+          nav_reset_filter();
+          break;
+        case PanTiltAbsCamera:
+          break;
+        case PanTiltRelCamera:
+          break;
+        case LevelCamera:
+          break;
+        case SetSpeed:
+          break;
+        case SetTurnRate:
+          break;
+        case LedBlinkRate:
+          blink_task.setInterval((unsigned long)(msg->val1 * 1000.0f));
+          break;
+        default:
+          break;
+        }
+      }
+      else {
+        ++crc_error_count;
       }
     }
   }

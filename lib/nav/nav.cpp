@@ -8,11 +8,10 @@
 #define GYRO_PIN A7
 
 // Complementary filter
-float acc_coeff = 0.025f;
+float acc_coeff = 0.005f;
 float gyr_coeff = 1.0f - acc_coeff;
 float delta_t = 0.01f;
 float freq = 1.0f / delta_t;
-const float gyr_analog2degps = 5.0f / (1024.0f * 0.007f);
 
 // Accelerometer board from FIRST Robotics 2012
 // http://www.team358.org/files/programming/ControlSystem2015-2019/specs/Accelerometer-Gyro.pdf
@@ -30,6 +29,7 @@ float ay_sum, az_sum;
 int16_t gy = 0;
 int16_t gy_bias = 0;
 float gy_sum;
+const float gyr_analog2degps = 5.0f / (1024.0f * 0.007f);
 
 int16_t avg_len = 100;
 
@@ -157,6 +157,7 @@ void nav()
 
         filter_init_b = true;
       }
+      _pitch_deg_f32 = 0.0f;
     }
   }
   return;

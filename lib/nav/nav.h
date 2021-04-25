@@ -18,6 +18,7 @@ extern float ay_sum, az_sum;
 extern int16_t gy;  
 extern int16_t gy_bias;  
 extern float gy_sum;  
+extern const float gyr_analog2degps;
 
 // One step of the pitch complementary filter
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy);

@@ -11,13 +11,9 @@ extern bool process_data_b;
 extern bool filter_init_b;
 
 extern int16_t ax, ay, az;
-extern int16_t ay_offset, az_offset;
-extern float ay_sum, az_sum;
 
 // Gyroscope 
 extern int16_t gy;  
-extern int16_t gy_bias;  
-extern float gy_sum;  
 extern const float gyr_analog2degps;
 
 // One step of the pitch complementary filter

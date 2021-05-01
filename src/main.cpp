@@ -38,7 +38,7 @@ Task pub_slow_task(1000, TASK_FOREVER, &pub_slow);
 Task pub_fast_task(10, TASK_FOREVER, &pub_fast);
 
 // Health LED
-bool blinkState = false;
+bool blink_state = false;
 
 // System status is initialising
 uint8_t system_status_i = BASE_STATUS_PREINIT;
@@ -51,11 +51,11 @@ uint16_t num_bytes_written_prev = 0U;
 
 // Global variables
 double pitch_cur_deg = 0.0;
-double pitch_tgt_deg = 0.0;
+double pitch_tgt_deg = -1.0;
 double speed = 0.0;
 
 // Instantiate controller
-double Kp = 2, Ki = 0, Kd = 0;
+double Kp = 4, Ki = 0, Kd = 0;
 PID ctl_pid(&pitch_cur_deg, &speed, &pitch_tgt_deg,
             Kp, Ki, Kd, DIRECT);
 
@@ -70,6 +70,7 @@ void setup()
 
   ctl_pid.SetMode(AUTOMATIC);
   ctl_pid.SetSampleTime(10);
+  ctl_pid.SetOutputLimits(-1000.0, 1000.0);
 
   runner.init();
 
@@ -84,7 +85,7 @@ void setup()
   pub_fast_task.enable();
 
   // Initialising filter
-  system_status_i = BASE_STATUS_FILTINIT + BASE_ERR_NONE;
+  system_status_i = BASE_STATUS_PREINIT + BASE_ERR_NONE;
 }
 
 void loop()
@@ -114,24 +115,24 @@ void gnc_task_run()
 {
   // Update pitch measurement
   nav();
-  pitch_cur_deg = nav_get_pitch();
-  ctl_pid.Compute();
-
-  // Update motor speed
-  if (fabs(pitch_cur_deg) > 0.3f)
-  {
-    ctl_set_motor_speed(speed,
-                        speed);
-  }
-  else
-  {
-    ctl_set_motor_speed(0.0f, 0.0f);
-  }
 
   // Update status
   if (nav_get_filter_init())
   {
     system_status_i = BASE_STATUS_RUNNING;
+    pitch_cur_deg = nav_get_pitch();
+    ctl_pid.Compute();
+
+    // Update motor speed
+    if (fabs(pitch_cur_deg - pitch_tgt_deg) > 0.0f)
+    {
+      ctl_set_motor_speed(speed,
+                          speed);
+    }
+    else
+    {
+      ctl_set_motor_speed(0.0f, 0.0f);
+    }
   }
   else
   {
@@ -142,8 +143,8 @@ void gnc_task_run()
 void blink()
 {
   // Blink LED to indicate activity
-  blinkState = !blinkState;
-  digitalWrite(LED_BUILTIN, blinkState);
+  blink_state = !blink_state;
+  digitalWrite(LED_BUILTIN, blink_state);
 }
 
 void pub_slow()

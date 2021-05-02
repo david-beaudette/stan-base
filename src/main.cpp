@@ -168,7 +168,10 @@ void pub_slow()
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.batt_soc = bat_get_state_of_charge();
   msg.batt_volt = bat_get_last_voltage();
-  msg.pitch_cmd = pitch_tgt_deg;
+  msg.pitch_zero = pitch_tgt_deg;
+  msg.pitch_ctl_gain_P = Kp;
+  msg.pitch_ctl_gain_I = Ki;
+  msg.pitch_ctl_gain_D = Kd;
   msg.crc = compute_fletcher16((uint8_t *)&msg,
                                sizeof(Base2HeadSlow) -
                                    sizeof(Head2BaseCommand::crc));
@@ -196,7 +199,7 @@ void pub_fast()
   msg.acc_count = (uint32_t)accel_isr_count;
   msg.cam_pan_pct = 0.0f;
   msg.cam_tilt_pct = 0.0f;
-  msg.pitch_ref = pitch_tgt_deg;
+  msg.pitch_cmd = pitch_tgt_deg;
   msg.pitch_est = pitch_cur_deg;
   msg.speed_cmd[0] = speed;
   msg.speed_cmd[1] = speed;
@@ -253,11 +256,23 @@ void serial_cmd_recv()
           nav_set_avg_len(msg->val2);
           nav_reset_filter();
           break;
+        case TunePitchControl1:
+          Kp = msg->val1;
+          Ki = msg->val2;
+          ctl_pid.SetTunings(Kp, Ki, Kd);
+          break;
+        case TunePitchControl2:
+          Kd = msg->val1;          
+          ctl_pid.SetTunings(Kp, Ki, Kd);
+          break;
         case PanTiltAbsCamera:
           break;
         case PanTiltRelCamera:
           break;
         case LevelCamera:
+          break;
+        case SetZeroPitch:
+          pitch_tgt_deg = msg->val1;
           break;
         case SetSpeed:
           break;

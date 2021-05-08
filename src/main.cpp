@@ -53,6 +53,7 @@ uint16_t num_bytes_written_prev = 0U;
 double pitch_cur_deg = 0.0;
 double pitch_tgt_deg = -1.0;
 double speed = 0.0;
+bool motors_enabled = false;
 
 // Instantiate controller
 double Kp = 4, Ki = 0, Kd = 0;
@@ -116,22 +117,22 @@ void gnc_task_run()
   // Update pitch measurement
   nav();
 
-  // Update status
+  // Update controller if motors are on and
+  // initialisation phase is complete
   if (nav_get_filter_init())
   {
-    system_status_i = BASE_STATUS_RUNNING;
     pitch_cur_deg = nav_get_pitch();
-    ctl_pid.Compute();
 
-    // Update motor speed
-    if (fabs(pitch_cur_deg - pitch_tgt_deg) > 0.0f)
+    if (motors_enabled)
     {
+      system_status_i = BASE_STATUS_RUNNING;
+      ctl_pid.Compute();
       ctl_set_motor_speed(speed,
                           speed);
     }
     else
     {
-      ctl_set_motor_speed(0.0f, 0.0f);
+      system_status_i = BASE_STATUS_MOTOR_OFF;
     }
   }
   else
@@ -262,7 +263,7 @@ void serial_cmd_recv()
           ctl_pid.SetTunings(Kp, Ki, Kd);
           break;
         case TunePitchControl2:
-          Kd = msg->val1;          
+          Kd = msg->val1;
           ctl_pid.SetTunings(Kp, Ki, Kd);
           break;
         case PanTiltAbsCamera:
@@ -281,11 +282,23 @@ void serial_cmd_recv()
         case LedBlinkRate:
           blink_task.setInterval((unsigned long)(msg->val1 * 1000.0f));
           break;
+        case SetRunningState:
+          motors_enabled = (msg->val1 > 0.5f);
+          if (motors_enabled)
+          {
+            ctl_enable_motors();
+          }
+          else
+          {
+            ctl_disable_motors();
+          }
+          break;
         default:
           break;
         }
       }
-      else {
+      else
+      {
         ++crc_error_count;
       }
     }

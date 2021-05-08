@@ -50,6 +50,10 @@ struct MotorPulse {
 
 void ctl_init();
 
+void ctl_enable_motors(void);
+  
+void ctl_disable_motors(void);
+
 void ctl_set_motor_speed(const float speed_left, 
                          const float speed_right);
 

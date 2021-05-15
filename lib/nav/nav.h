@@ -7,12 +7,7 @@
 #define NAV_H
 
 extern float accel_isr_count;
-extern bool process_data_b;
-extern bool filter_init_b;
-
 extern int16_t ax, ay, az;
-
-// Gyroscope 
 extern int16_t gy;  
 extern const float gyr_analog2degps;
 
@@ -22,6 +17,7 @@ void nav_set_filter_gain(float acc_coeff_upd);
 void nav_set_avg_len(float avg_len_upd);
 
 float nav_get_pitch();
+float nav_get_filter_gain();
 
 bool nav_get_filter_init();
 void nav_reset_filter();

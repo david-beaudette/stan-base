@@ -8,10 +8,10 @@
 #define GYRO_PIN A7
 
 // Complementary filter
-float acc_coeff = 0.005f;
-float gyr_coeff = 1.0f - acc_coeff;
-float delta_t = 0.01f;
-float freq = 1.0f / delta_t;
+float _acc_coeff = 0.005f;
+float _gyr_coeff = 1.0f - _acc_coeff;
+float _delta_t = 0.01f;
+float _freq = 1.0f / _delta_t;
 
 // Accelerometer board from FIRST Robotics 2012
 // http://www.team358.org/files/programming/ControlSystem2015-2019/specs/Accelerometer-Gyro.pdf
@@ -27,8 +27,8 @@ const float gyr_analog2degps = 5.0f / (1024.0f * 0.007f);
 
 // Initialisation
 float accel_isr_count = 0.0f;
-bool filter_init_b = false;
-int16_t avg_len = 200;
+bool _filter_init_b = false;
+int16_t _avg_len = 200;
 float _pitch_avg;
 
 // Output
@@ -37,17 +37,21 @@ float _pitch_deg_f32 = 0.0f;
 float nav_get_pitch()
 {
   return _pitch_deg_f32;
-;
+}
+
+float nav_get_filter_gain()
+{
+  return _acc_coeff;
 }
 
 bool nav_get_filter_init()
 {
-  return filter_init_b;
+  return _filter_init_b;
 }
 
 void nav_reset_filter()
 {
-  filter_init_b = false;
+  _filter_init_b = false;
   accel_isr_count = 0;
   _gy_bias = 0;
   _pitch_avg = 0.0f;
@@ -58,11 +62,11 @@ void nav_reset_filter()
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy)
 {
   long squaresum = (long)ay * ay + (long)az * az;
-  float pitch_gyr = (((float)gy * gyr_analog2degps) * delta_t);
+  float pitch_gyr = (((float)gy * gyr_analog2degps) * _delta_t);
   float pitch_acc = atan((float)ax / sqrt((float)squaresum)) * RAD_TO_DEG;
 
   // Update pitch with measurements when valid
-  if(!filter_init_b) {
+  if(!_filter_init_b) {
     // When initialising, the body is assumed to be static 
     pitch = pitch_acc;
   }
@@ -70,30 +74,30 @@ void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy)
     pitch += pitch_gyr;
   } 
   if(abs(pitch_acc) <= 180.0f) {
-    pitch = gyr_coeff * pitch + acc_coeff * pitch_acc;
+    pitch = _gyr_coeff * pitch + _acc_coeff * pitch_acc;
   }
 }
 
 void nav_set_filter_gain(float acc_coeff_upd)
 {
-  acc_coeff = acc_coeff_upd;
-  gyr_coeff = 1.0f - acc_coeff;
+  _acc_coeff = acc_coeff_upd;
+  _gyr_coeff = 1.0f - _acc_coeff;
 }
 
 void nav_set_avg_len(float avg_len_upd)
 {
-  float avg_len_count = avg_len_upd * freq;
+  float avg_len_count = avg_len_upd * _freq;
   if (avg_len_count < 0.0f)
   {
-    avg_len = 0U;
+    _avg_len = 0U;
   }
   else if (avg_len_count > (float)UINT16_MAX)
   {
-    avg_len = UINT16_MAX;
+    _avg_len = UINT16_MAX;
   }
   else
   {
-    avg_len = (uint16_t)avg_len_count;
+    _avg_len = (uint16_t)avg_len_count;
   }
 }
 
@@ -101,8 +105,8 @@ bool nav_init(float dt)
 {
 
   // Set function sample time
-  delta_t = dt;
-  freq = 1.0f / delta_t;
+  _delta_t = dt;
+  _freq = 1.0f / _delta_t;
 
   // Join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
@@ -133,7 +137,7 @@ void nav()
     accel.getAcceleration(&ax, &ay, &az);
     accel_isr_count += 1.0f;
 
-    if (filter_init_b)
+    if (_filter_init_b)
     {
       /* Axes are as follows:
       /  X points down
@@ -153,12 +157,12 @@ void nav()
       complementary_filter_step(_pitch_deg_f32, -ay, -az, ax, gy);
       _pitch_avg += _pitch_deg_f32;
 
-      if (accel_isr_count >= avg_len)
+      if (accel_isr_count >= _avg_len)
       {
         _gy_bias = (int16_t)(_gy_sum / accel_isr_count);
         _pitch_avg = _pitch_avg / accel_isr_count;
 
-        filter_init_b = true;
+        _filter_init_b = true;
       }
       _pitch_deg_f32 = 0.0f;
     }

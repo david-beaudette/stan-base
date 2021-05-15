@@ -56,7 +56,7 @@ double speed = 0.0;
 bool motors_enabled = false;
 
 // Instantiate controller
-double Kp = 4, Ki = 0, Kd = 0;
+double Kp = 1, Ki = 0, Kd = 0;
 PID ctl_pid(&pitch_cur_deg, &speed, &pitch_tgt_deg,
             Kp, Ki, Kd, DIRECT);
 
@@ -170,6 +170,7 @@ void pub_slow()
   msg.batt_soc = bat_get_state_of_charge();
   msg.batt_volt = bat_get_last_voltage();
   msg.pitch_zero = pitch_tgt_deg;
+  msg.pitch_filter_gain = nav_get_filter_gain();
   msg.pitch_ctl_gain_P = Kp;
   msg.pitch_ctl_gain_I = Ki;
   msg.pitch_ctl_gain_D = Kd;

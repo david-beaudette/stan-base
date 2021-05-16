@@ -53,12 +53,12 @@ uint16_t num_bytes_written_prev = 0U;
 
 // Global variables
 double pitch_cur_deg = 0.0;
-double pitch_tgt_deg = -1.0;
+double pitch_tgt_deg = 0.0;
 double speed = 0.0;
 bool motors_enabled = false;
 
 // Instantiate controller
-double Kp = 1, Ki = 0, Kd = 0;
+double Kp = 0.1, Ki = 0, Kd = 0;
 PID ctl_pid(&pitch_cur_deg, &speed, &pitch_tgt_deg,
             Kp, Ki, Kd, DIRECT);
 
@@ -199,7 +199,7 @@ void pub_fast()
   msg.forebyte = BASE2HEAD_FOREBYTE_FAST;
   msg.seq = seq_num_fast;
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
-  msg.acc_count = (uint32_t)accel_isr_count;
+  msg.acc_count = accel_isr_count_ui32;
   msg.cam_pan_pct = 0.0f;
   msg.cam_tilt_pct = 0.0f;
   msg.pitch_cmd = pitch_tgt_deg;

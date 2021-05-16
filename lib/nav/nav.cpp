@@ -21,14 +21,14 @@ int16_t ax, ay, az;
 
 // Gyroscope
 int16_t gy = 0;
-int16_t _gy_bias = 0;
+float _gy_bias = 0;
 float _gy_sum;
 const float gyr_analog2degps = 5.0f / (1024.0f * 0.007f);
 
 // Initialisation
-float accel_isr_count = 0.0f;
+uint32_t accel_isr_count_ui32 = 0U;
 bool _filter_init_b = false;
-int16_t _avg_len = 200;
+uint16_t _avg_len = 200U;
 float _pitch_avg;
 
 // Output
@@ -52,8 +52,9 @@ bool nav_get_filter_init()
 void nav_reset_filter()
 {
   _filter_init_b = false;
-  accel_isr_count = 0;
-  _gy_bias = 0;
+  accel_isr_count_ui32 = 0U;
+  _gy_bias = 0.0f;
+  _gy_sum = 0.0f;
   _pitch_avg = 0.0f;
   return;
 }
@@ -62,7 +63,7 @@ void nav_reset_filter()
 void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy)
 {
   long squaresum = (long)ay * ay + (long)az * az;
-  float pitch_gyr = (((float)gy * gyr_analog2degps) * _delta_t);
+  float pitch_gyr = ((((float)gy - _gy_bias) * gyr_analog2degps) * _delta_t);
   float pitch_acc = atan((float)ax / sqrt((float)squaresum)) * RAD_TO_DEG;
 
   // Update pitch with measurements when valid
@@ -135,7 +136,7 @@ void nav()
   {
     // Read raw accel measurements from device
     accel.getAcceleration(&ax, &ay, &az);
-    accel_isr_count += 1.0f;
+    ++accel_isr_count_ui32;
 
     if (_filter_init_b)
     {
@@ -143,7 +144,7 @@ void nav()
       /  X points down
       /  Y points backward
       /  Z points left */
-      gy = analogRead(GYRO_PIN) - _gy_bias;
+      gy = analogRead(GYRO_PIN);
       
       complementary_filter_step(_pitch_deg_f32, -ay, -az, ax, gy);
     }
@@ -157,11 +158,11 @@ void nav()
       complementary_filter_step(_pitch_deg_f32, -ay, -az, ax, gy);
       _pitch_avg += _pitch_deg_f32;
 
-      if (accel_isr_count >= _avg_len)
+      if (accel_isr_count_ui32 >= _avg_len)
       {
-        _gy_bias = (int16_t)(_gy_sum / accel_isr_count);
-        _pitch_avg = _pitch_avg / accel_isr_count;
-
+        _gy_bias = _gy_sum / (float)accel_isr_count_ui32;
+        _pitch_avg = _pitch_avg / (float)accel_isr_count_ui32;
+        _gy_sum = 0.0f;
         _filter_init_b = true;
       }
       _pitch_deg_f32 = 0.0f;

@@ -6,7 +6,7 @@
 #ifndef NAV_H
 #define NAV_H
 
-extern float accel_isr_count;
+extern uint32_t accel_isr_count_ui32;
 extern int16_t ax, ay, az;
 extern int16_t gy;  
 extern const float gyr_analog2degps;

@@ -22,6 +22,7 @@ void gnc_task_run();
 void blink();
 void pub_slow();
 void pub_fast();
+void check_sys();
 
 // Serial callbacks
 void serial_cmd_recv();
@@ -36,6 +37,7 @@ Task gnc_task((int)(gnc_task_dt * 1000.0f), TASK_FOREVER, &gnc_task_run);
 Task blink_task(500, TASK_FOREVER, &blink);
 Task pub_slow_task(1000, TASK_FOREVER, &pub_slow);
 Task pub_fast_task(10, TASK_FOREVER, &pub_fast);
+Task check_sys_task(1000, TASK_FOREVER, &check_sys);
 
 // Health LED
 bool blink_state = false;
@@ -79,14 +81,13 @@ void setup()
   runner.addTask(blink_task);
   runner.addTask(pub_slow_task);
   runner.addTask(pub_fast_task);
+  runner.addTask(check_sys_task);
 
   gnc_task.enable();
   blink_task.enable();
   pub_slow_task.enable();
   pub_fast_task.enable();
-
-  // Initialising filter
-  system_status_i = BASE_STATUS_PREINIT + BASE_ERR_NONE;
+  check_sys_task.enable();
 }
 
 void loop()
@@ -216,6 +217,18 @@ void pub_fast()
   num_bytes_written_prev = Serial.write((uint8_t *)&msg, sizeof(msg));
 }
 
+void check_sys()
+{
+  if (bat_check_level())
+  {
+    system_err_i &= ~BASE_ERR_LOW_BAT;
+  }
+  else
+  {
+    system_err_i |= BASE_ERR_LOW_BAT;
+  }
+}
+
 void serial_error_cb(uint8_t err_num_i)
 {
   system_err_i = BASE_ERR_SERIAL;
@@ -259,12 +272,12 @@ void serial_cmd_recv()
           nav_reset_filter();
           break;
         case TunePitchControl1:
-          Kp = msg->val1;
-          Ki = msg->val2;
+          Kp += msg->val1;
+          Ki += msg->val2;
           ctl_pid.SetTunings(Kp, Ki, Kd);
           break;
         case TunePitchControl2:
-          Kd = msg->val1;
+          Kd += msg->val1;
           ctl_pid.SetTunings(Kp, Ki, Kd);
           break;
         case PanTiltAbsCamera:
@@ -273,8 +286,8 @@ void serial_cmd_recv()
           break;
         case LevelCamera:
           break;
-        case SetZeroPitch:
-          pitch_tgt_deg = msg->val1;
+        case TuneZeroPitch:
+          pitch_tgt_deg += msg->val1;
           break;
         case SetSpeed:
           break;

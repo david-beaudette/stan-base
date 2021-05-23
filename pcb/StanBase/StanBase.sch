@@ -51,17 +51,6 @@ F 3 "https://www.pololu.com/product/2980/pictures" H 2800 4650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Sensor_Motion:BNO055 U?
-U 1 1 60AA352F
-P 8500 2250
-F 0 "U?" H 8500 3131 50  0000 C CNN
-F 1 "BNO055" H 8500 3040 50  0000 C CNN
-F 2 "Package_LGA:LGA-28_5.2x3.8mm_P0.5mm" H 8750 1600 50  0001 L CNN
-F 3 "https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST_BNO055_DS000_14.pdf" H 8500 2450 50  0001 C CNN
-	1    8500 2250
-	1    0    0    -1  
-$EndComp
-$Comp
 L 2021-05-23_10-52-06:MAX14934AAWE+ U?
 U 1 1 60AA5A98
 P 8300 4100

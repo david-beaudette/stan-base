@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 14.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 43363)  -->
+
+<svg
+   id="svg"
+   viewBox="0 0 54 48.600001"
+   height="0.67500001in"
+   xml:space="preserve"
+   enable-background="new 0 0 54 59.04"
+   y="0px"
+   gorn="0"
+   x="0px"
+   width="0.75in"
+   version="1.1"
+   sodipodi:docname="GyroBoard.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs1719" /><sodipodi:namedview
+   id="namedview1717"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:document-units="in"
+   showgrid="false"
+   height="0.68in"
+   inkscape:zoom="9.3622968"
+   inkscape:cx="12.229905"
+   inkscape:cy="34.126241"
+   inkscape:window-width="1680"
+   inkscape:window-height="987"
+   inkscape:window-x="-8"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="breadboard" />
+    <desc
+   id="desc1554">
+        <referenceFile>Barometric_Pressure_Sensor__2eaec138e035.svg</referenceFile>
+    </desc>
+    <circle
+   id="connector0pin"
+   fill="none"
+   r="1.387"
+   gorn="0.0"
+   cx="4.7379999"
+   cy="7.2340002" />
+    <circle
+   id="connector1pin"
+   fill="none"
+   r="1.387"
+   gorn="0.1"
+   cx="4.7379999"
+   cy="14.538" />
+    <circle
+   id="connector2pin"
+   fill="none"
+   r="1.387"
+   gorn="0.2"
+   cx="4.7379999"
+   cy="21.841" />
+    <circle
+   id="connector3pin"
+   fill="none"
+   r="1.387"
+   gorn="0.3"
+   cx="4.7379999"
+   cy="29.145" />
+    <circle
+   id="connector4pin"
+   fill="none"
+   r="1.387"
+   gorn="0.4"
+   cx="4.7379999"
+   cy="36.446999" />
+    <circle
+   id="connector5pin"
+   fill="none"
+   r="1.388"
+   gorn="0.5"
+   cx="4.7379999"
+   cy="43.75" />
+    <circle
+   id="connector6pin"
+   fill="none"
+   r="1.388"
+   gorn="0.6"
+   cx="4.7379999"
+   cy="50.953999" />
+    <g
+   id="breadboard"
+   gorn="0.7">
+        <rect
+   fill="#1f7a34"
+   height="48.54578"
+   width="54"
+   id="rect1563"
+   x="0"
+   y="0"
+   style="stroke-width:0.906781;fill:#000080" />
+        
+        
+        
+        <rect
+   fill="none"
+   height="43.829212"
+   stroke-linecap="round"
+   y="3.6245091"
+   stroke-miterlimit="10"
+   stroke="#ffffff"
+   stroke-width="0.5826"
+   x="1.0725092"
+   stroke-linejoin="round"
+   width="7.3299818"
+   id="rect1571" />
+        <g
+   id="g1576">
+            <path
+   fill="#9a916c"
+   d="m 4.738,4.824 c -1.331,0 -2.409,1.078 -2.409,2.41 0,1.33 1.078,2.41 2.409,2.41 1.33,0 2.41,-1.08 2.41,-2.41 0,-1.332 -1.08,-2.41 -2.41,-2.41 z m 0,3.797 C 3.972,8.621 3.351,8 3.351,7.234 c 0,-0.766 0.621,-1.387 1.387,-1.387 0.767,0 1.388,0.621 1.388,1.387 0,0.766 -0.623,1.387 -1.388,1.387 z"
+   id="path1573" />
+            <circle
+   id="hole_6_"
+   fill="#ffffff"
+   r="1.387"
+   gorn="0.7.5.1"
+   cx="4.7379999"
+   cy="7.2280002" />
+        </g>
+        <g
+   id="g1581">
+            <path
+   fill="#9a916c"
+   d="m 4.738,12.127 c -1.331,0 -2.409,1.078 -2.409,2.41 0,1.33 1.078,2.41 2.409,2.41 1.33,0 2.41,-1.08 2.41,-2.41 0,-1.331 -1.08,-2.41 -2.41,-2.41 z m 0,3.797 c -0.766,0 -1.387,-0.621 -1.387,-1.387 0,-0.766 0.621,-1.387 1.387,-1.387 0.767,0 1.388,0.621 1.388,1.387 -0.001,0.766 -0.623,1.387 -1.388,1.387 z"
+   id="path1578" />
+            <circle
+   id="hole_5_"
+   fill="#ffffff"
+   r="1.387"
+   gorn="0.7.6.1"
+   cx="4.7379999"
+   cy="14.532" />
+        </g>
+        <g
+   id="g1586">
+            <path
+   fill="#9a916c"
+   d="m 4.738,19.431 c -1.331,0 -2.409,1.078 -2.409,2.41 0,1.33 1.078,2.41 2.409,2.41 1.33,0 2.41,-1.08 2.41,-2.41 0,-1.332 -1.08,-2.41 -2.41,-2.41 z m 0,3.797 c -0.766,0 -1.387,-0.621 -1.387,-1.387 0,-0.766 0.621,-1.387 1.387,-1.387 0.767,0 1.388,0.621 1.388,1.387 -0.001,0.766 -0.623,1.387 -1.388,1.387 z"
+   id="path1583" />
+            <circle
+   id="hole_4_"
+   fill="#ffffff"
+   r="1.387"
+   gorn="0.7.7.1"
+   cx="4.7379999"
+   cy="21.834999" />
+        </g>
+        <g
+   id="g1591">
+            <path
+   fill="#9a916c"
+   d="m 4.738,26.733 c -1.331,0 -2.409,1.078 -2.409,2.41 0,1.33 1.078,2.41 2.409,2.41 1.33,0 2.41,-1.08 2.41,-2.41 0,-1.331 -1.08,-2.41 -2.41,-2.41 z m 0,3.799 c -0.766,0 -1.387,-0.622 -1.387,-1.389 0,-0.766 0.621,-1.387 1.387,-1.387 0.767,0 1.388,0.621 1.388,1.387 -0.001,0.767 -0.623,1.389 -1.388,1.389 z"
+   id="path1588" />
+            <circle
+   id="hole_3_"
+   fill="#ffffff"
+   r="1.387"
+   gorn="0.7.8.1"
+   cx="4.7379999"
+   cy="29.139" />
+        </g>
+        <g
+   id="g1596">
+            <path
+   fill="#9a916c"
+   d="m 4.738,34.038 c -1.331,0 -2.409,1.078 -2.409,2.41 0,1.328 1.078,2.408 2.409,2.408 1.33,0 2.41,-1.08 2.41,-2.408 0,-1.332 -1.08,-2.41 -2.41,-2.41 z m 0,3.796 c -0.766,0 -1.387,-0.621 -1.387,-1.387 0,-0.769 0.621,-1.39 1.387,-1.39 0.767,0 1.388,0.621 1.388,1.39 -0.001,0.766 -0.623,1.387 -1.388,1.387 z"
+   id="path1593" />
+            <circle
+   id="hole_2_"
+   fill="#ffffff"
+   r="1.387"
+   gorn="0.7.9.1"
+   cx="4.7379999"
+   cy="36.441002" />
+        </g>
+        <g
+   id="g1601">
+            <path
+   fill="#9a916c"
+   d="m 4.738,41.34 c -1.331,0 -2.409,1.078 -2.409,2.41 0,1.33 1.078,2.41 2.409,2.41 1.33,0 2.41,-1.08 2.41,-2.41 0,-1.332 -1.08,-2.41 -2.41,-2.41 z m 0,3.798 c -0.766,0 -1.387,-0.621 -1.387,-1.388 0,-0.769 0.621,-1.39 1.387,-1.39 0.767,0 1.388,0.621 1.388,1.39 0,0.767 -0.623,1.388 -1.388,1.388 z"
+   id="path1598" />
+            <circle
+   id="hole_1_"
+   fill="#ffffff"
+   r="1.388"
+   gorn="0.7.10.1"
+   cx="4.7379999"
+   cy="43.743999" />
+        </g>
+        
+        <g
+   transform="translate(9.3457,8.4302)"
+   id="g1609">
+            <text
+   id="text_7_"
+   fill="#ffffff"
+   gorn="0.7.12.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan15320">Rate</tspan></text>
+        </g>
+        <g
+   transform="translate(23.7622,4.5063)"
+   id="g1612">
+            <text
+   id="text_6_"
+   fill="#ffffff"
+   gorn="0.7.13.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan14327">Gyro</tspan></text>
+        </g>
+        <g
+   transform="translate(9.7622,15.7368)"
+   id="g1615">
+            <text
+   id="text_5_"
+   fill="#ffffff"
+   gorn="0.7.14.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan16476">5V1</tspan></text>
+        </g>
+        <g
+   transform="translate(9.0122,23.0376)"
+   id="g1618">
+            <text
+   id="text_4_"
+   fill="#ffffff"
+   gorn="0.7.15.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan18906">GND1</tspan></text>
+        </g>
+        <g
+   transform="translate(9.3452,30.3384)"
+   id="g1621">
+            <text
+   id="text_3_"
+   fill="#ffffff"
+   gorn="0.7.16.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan19992">Temp</tspan></text>
+        </g>
+        <g
+   transform="translate(9.9287,37.647)"
+   id="g1624">
+            <text
+   id="text_2_"
+   fill="#ffffff"
+   gorn="0.7.17.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan20826">5V2</tspan></text>
+        </g>
+        <g
+   transform="translate(9.2617,44.9487)"
+   id="g1627">
+            <text
+   id="text_1_"
+   fill="#ffffff"
+   gorn="0.7.18.0"
+   font-size="4px"
+   font-family="OCRA"
+   style="-inkscape-font-specification:'OCRA, Normal';font-family:OCRA;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
+     sodipodi:role="line"
+     id="tspan22248">GND2</tspan></text>
+        </g>
+        
+        
+        
+    <rect
+   style="fill:#ffccaa;fill-rule:evenodd;stroke-width:1.22227"
+   id="rect2383"
+   width="24.112673"
+   height="22.109959"
+   x="26.756256"
+   y="13.778668"
+   ry="5.0722847" /><g
+   transform="matrix(1.6408548,0,0,0.67714375,28.314958,27.341677)"
+   id="g1609-9"
+   style="fill:#000000;stroke:none;stroke-opacity:1"><text
+     id="text_7_-1"
+     fill="#ffffff"
+     gorn="0.7.12.0"
+     font-size="3.83765px"
+     font-family="OCRA"
+     style="fill:#000000;stroke:none;stroke-width:0.959415;stroke-opacity:1"
+     x="-0.3567284"
+     y="-0.7731418"
+     transform="scale(0.60319859,1.6578288)">ADW22307</text></g></g>
+</svg>

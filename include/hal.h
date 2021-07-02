@@ -1,1 +1,5 @@
-#define GYRO_PIN A7 
+#ifndef HAL_H
+#define HAL_H
+
+
+#endif // HAL_H

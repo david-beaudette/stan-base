@@ -1,0 +1,17 @@
+Specification:
+Weight: 13.4g
+Dimension: 22.8×12.2×28.5mm
+Stall torque: 1.8kg/cm (4.8V); 2.2kg/cm (6.6V)
+Operating speed: 0.10sec/60degree (4.8V); 0.08sec/60degree (6.0V)
+Operating voltage: 4.8V
+Temperature range: 0 to 55decC
+Dead band width: 1us
+Power Supply: Through External Adapter
+servo wire length: 25 cm
+Servo Plug: JR (Fits JR and Futaba)
+servo arms &screws included
+It’s universal “S” type connector that fits most receivers, including Futaba, JR, Hitec ,GWS, Cirrus, Blue Bird, Blue Arrow, Corona, Berg, Spektrum.
+CE &RoHS approved
+
+We have upgraded our servo gear set and shaft to aluminum 6061-T6.
+It is stronger and lighter than copper.

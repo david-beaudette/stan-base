@@ -2,18 +2,42 @@
 #include "Arduino.h"
 #include <cam.h>
 
-float pan_angle = 0.0f;
-float tilt_angle = 0.0f;
+// Current commanded angle in millidegrees
+float pan_angle_cmd_deg_f32 = 0.0f;
+float tilt_angle_cmd_deg_f32 = 0.0f;
 
-uint32_t cam_pan_ticks_cur_ui32 = 0U;
-uint32_t cam_tilt_ticks_cur_ui32 = 0U;
+// Angular displacement range of servos
+const int32_t angle_min_mdeg_i32 = -90000;
+const int32_t angle_max_mdeg_i32 =  90000;
 
-uint32_t cam_pan_ticks_tgt_ui32 = 0U;
-uint32_t cam_tilt_ticks_tgt_ui32 = 0U;
+// Pulse width range in nanoseconds
+// Number of ns per timer count
+#define tick2ns 2000
 
-uint8_t pwm_clock_cycles_ui8 = (uint8_t)0.050 * ;
+const int32_t pw_min_ticks_i32 =  100000 / tick2ns;
+const int32_t pw_max_ticks_i32 = 3500000 / tick2ns;
+
+uint8_t cam_pan_num_oci_cur_ui8 = 0U;
+uint8_t cam_tilt_num_oci_cur_ui8 = 0U;
+
+uint8_t cam_pan_oci_val_ui8 = 0U;
+uint8_t cam_tilt_oci_val_ui8 = 0U;
+
+uint8_t cam_pan_num_oci_tgt_ui8 = 0U;
+uint8_t cam_tilt_num_oci_tgt_ui8 = 0U;
+
+uint8_t cam_pwm_num_ovf_cur_ui8 = 0U;
+
+// With the prescaler set at 32, 39 timer 
+// overflows yield a 0.0199680 s period, 
+// 0.2% off from nominal PWM 20 ms period
+// Good enough since only the pulse width is
+// usually relevant for servo control
+const uint8_t cam_pwm_num_ovf_tgt_ui8 = 39U;
 
 void cam_init() {
+
+  // Digital pins setup
   pinMode(CAM_PAN_PIN, OUTPUT);
   pinMode(CAM_TILT_PIN, OUTPUT);
   digitalWrite(CAM_PAN_PIN, HIGH);
@@ -31,51 +55,117 @@ void cam_init() {
 
   // Set timer to operate in normal mode
   TCCR2A = 0x00;
+  TCNT2 = 0;
 
-  // Set clock source without prescaler
-  TCCR2B = 0x01;
+  // Set clock source with 32 cycles prescaler
+  TCCR2B = 0x03;
+
+  // Set initial target pulse width 
+  // to 1500 ms (servo centered)
+  OCR2A = 127; 
+  OCR2B = 127;
 
   // Enable interrupts globally
   sei();
   
-  //Initialize Timer2
-  TCCR2A = 0;
-  TCCR2B = 0;
-  TCNT2 = 0;
-
-  // Set up /1024 prescale
-  bitSet(TCCR2B, CS20);
-  bitSet(TCCR2B, CS21);
-  bitSet(TCCR2B, CS22);
-
-  //OCR2A = 32;      // Sets freq 50hz?    OC2A PIN 11
-  OCR2A = 156; //Sets freq 50Hz
-  //Timer 2 counts up and down for 312 total counts
-  //312 x 1024 x.0625 = 19.968ms 50.08 Hz
-
-  // enable timer compare interrupt
-  //bitSet(TIMSK2, OCIE2A);
-
-  OCR2B = 78;//50% duty cycle valid values 1-155
 }
 
 void cam_center() {
-  
+  pan_angle_cmd_deg_f32 = 0;
+  tilt_angle_cmd_deg_f32 = 0;
 }
 
 void cam_set_pan(float angle_deg_f32) {
-  
+
+  // Compute the corresponding pulse width
+  pan_angle_cmd_deg_f32 = angle2ticks(&cam_pan_num_oci_tgt_ui8,
+                                      &cam_pan_oci_val_ui8,
+                                      angle_deg_f32);
 }
 
 void cam_set_tilt(float angle_deg_f32) {
+
+  // Compute the corresponding pulse width
+  tilt_angle_cmd_deg_f32 = angle2ticks(&cam_tilt_num_oci_tgt_ui8,
+                                       &cam_tilt_oci_val_ui8,
+                                       angle_deg_f32);
   
 }
+float angle2ticks(uint8_t *num_oci_tgt_ui8,
+                  uint8_t *oci_val_ui8,
+                  const float angle_deg_f32) {
 
-void cam_pwm_cycle_end() {
-  // Compute next PWM falling edge for both outputs
+  int32_t angle_mdeg_i32 = (int32_t)(angle_deg_f32 * 1000.0f);
+  int32_t pw_len_ticks = map(angle_mdeg_i32, 
+                             angle_min_mdeg_i32, 
+                             angle_max_mdeg_i32, 
+                             pw_min_ticks_i32, 
+                             pw_max_ticks_i32);
 
+  *num_oci_tgt_ui8 = (uint8_t)(pw_len_ticks >> 8);
+  *oci_val_ui8 = (uint8_t)(pw_len_ticks & 255);
+  
+  // Reverse the computation to verify
+  pw_len_ticks = ((int32_t)(*num_oci_tgt_ui8) << 8) + 
+                  (int32_t)(*oci_val_ui8);
 
-  // Reset PWM cycle at rising edge
-  //digitalWrite(CAM_PAN_PIN, HIGH);
-  //digitalWrite(CAM_TILT_PIN, HIGH);
+  angle_mdeg_i32 = map(pw_len_ticks, 
+                      pw_min_ticks_i32, 
+                      pw_max_ticks_i32, 
+                      angle_min_mdeg_i32, 
+                      angle_max_mdeg_i32); 
+
+  float angle_clc_deg_f32 = (float)angle_mdeg_i32 * 0.001f;
+
+  return angle_clc_deg_f32;
+}
+
+float cam_get_pan() {
+  return pan_angle_cmd_deg_f32;
+}
+
+float cam_set_tilt() {
+  return tilt_angle_cmd_deg_f32;
+}
+
+// Interrupt service run when Timer/Counter2 reaches OCR2A
+ISR(TIMER2_COMPA_vect)
+{
+  ++cam_pan_num_oci_cur_ui8;
+  // Check for end of pulse period
+  if(cam_pan_num_oci_cur_ui8 == cam_pan_num_oci_tgt_ui8) {
+    // End PWM pulse
+    digitalWrite(CAM_PAN_PIN, LOW);
+  }
+}
+
+// Interrupt service run when Timer/Counter2 reaches OCR2B
+ISR(TIMER2_COMPB_vect)
+{
+  ++cam_tilt_num_oci_cur_ui8;
+  // Check for end of pulse period
+  if(cam_tilt_num_oci_cur_ui8 >= cam_tilt_num_oci_tgt_ui8) {
+    // End PWM pulse
+    digitalWrite(CAM_TILT_PIN, LOW);
+  }
+}
+
+// Interrupt service run when Timer/Counter2 overflows
+ISR(TIMER2_OVF_vect) {
+  ++cam_pwm_num_ovf_cur_ui8;
+  // Check for end of PWM period
+  if(cam_pwm_num_ovf_cur_ui8 >= cam_pwm_num_ovf_tgt_ui8) {
+    // Reset PWM cycle at rising edge
+    digitalWrite(CAM_PAN_PIN, HIGH);
+    digitalWrite(CAM_TILT_PIN, HIGH);
+
+    // Reset all counters
+    cam_pwm_num_ovf_cur_ui8 = 0U;
+    cam_pan_num_oci_cur_ui8 = 0U;
+    cam_tilt_num_oci_cur_ui8 = 0U;
+
+    // Update counter compare values
+    OCR2A = cam_pan_oci_val_ui8;
+    OCR2B = cam_tilt_oci_val_ui8;
+  }
 }

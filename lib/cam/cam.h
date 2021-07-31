@@ -15,4 +15,11 @@ void cam_set_pan(float angle_deg_f32);
 void cam_set_tilt(float angle_deg_f32);
 void cam_pwm_cycle_end();
 
+float angle2ticks(uint8_t *num_oci_tgt_ui8,
+                  uint8_t *oci_val_ui8,
+                  const float angle_deg_f32);
+
+float cam_get_pan();
+float cam_get_tilt();
+
 #endif // CAM_H

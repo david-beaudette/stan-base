@@ -85,7 +85,7 @@ void test_motor_ramp(void) {
 }
 
 void test_bat_level(void) {
-  TEST_ASSERT_TRUE(check_bat_level_verbose());
+  TEST_ASSERT_TRUE(bat_check_level());
 }
 
 void setup() {

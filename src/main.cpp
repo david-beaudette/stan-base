@@ -11,6 +11,7 @@
 // Project headers
 #include "nav.h"
 #include "ctl.h"
+#include "cam.h"
 #include "bat.h"
 #include "PID_v1.h"
 #include "Base2Head.hpp"
@@ -19,6 +20,7 @@
 
 // Function declaration
 void gnc_task_run();
+void cam_task_run();
 void blink();
 void pub_slow();
 void pub_fast();
@@ -34,6 +36,7 @@ float gnc_task_dt = 0.01f;
 Scheduler runner;
 
 Task gnc_task((int)(gnc_task_dt * 1000.0f), TASK_FOREVER, &gnc_task_run);
+Task cam_task(50, TASK_FOREVER, &cam_task_run);
 Task blink_task(500, TASK_FOREVER, &blink);
 Task pub_slow_task(1000, TASK_FOREVER, &pub_slow);
 Task pub_fast_task(10, TASK_FOREVER, &pub_fast);
@@ -140,6 +143,13 @@ void gnc_task_run()
   {
     system_status_i = BASE_STATUS_FILTINIT;
   }
+}
+
+void cam_task_run()
+{
+  // Update pitch measurement
+  cam_pwm_cycle_end();
+
 }
 
 void blink()

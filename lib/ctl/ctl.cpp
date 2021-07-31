@@ -29,7 +29,7 @@ void ctl_init()
 
   // Reset compare values
   OCR1A = 0U;
-  OCR2A = 0U;
+  OCR1B = 0U;
 
   // Enable output compare interrupts
   TIMSK1 = B00000110;

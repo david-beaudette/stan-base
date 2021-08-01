@@ -57,6 +57,10 @@ double pitch_cur_deg = 0.0;
 double pitch_tgt_deg = 0.0;
 double speed = 0.0;
 bool motors_enabled = false;
+uint8_t cam_tilt_mode_ui8 = 1; // 0: Absolute tilt; 1: Relative tilt
+float cam_pan_deg_f32 = 0.0f;
+float cam_tilt_deg_f32 = 0.0f; 
+float cam_tilt_offset_deg_f32 = 0.0f; // Only used in mode 1
 
 // Instantiate controller
 double Kp = 0.1, Ki = 0, Kd = 0;
@@ -137,6 +141,10 @@ void gnc_task_run()
     {
       system_status_i = BASE_STATUS_MOTOR_OFF;
     }
+    if (cam_tilt_mode_ui8 == 1U) {
+      cam_tilt_deg_f32 = cam_set_tilt(pitch_cur_deg + 
+                                      cam_tilt_offset_deg_f32);
+    }
   }
   else
   {
@@ -202,8 +210,8 @@ void pub_fast()
   msg.seq = seq_num_fast;
   msg.status = (system_status_i & 0x0F) + ((system_err_i & 0x0F) << 4);
   msg.acc_count = accel_isr_count_ui32;
-  msg.cam_pan_pct = 0.0f;
-  msg.cam_tilt_pct = 0.0f;
+  msg.cam_pan_pct = cam_pan_deg_f32;
+  msg.cam_tilt_pct = cam_tilt_deg_f32;
   msg.pitch_cmd = pitch_tgt_deg;
   msg.pitch_est = pitch_cur_deg;
   msg.speed_cmd[0] = speed;
@@ -283,10 +291,19 @@ void serial_cmd_recv()
           ctl_pid.SetTunings(Kp, Ki, Kd);
           break;
         case PanTiltAbsCamera:
+          cam_tilt_mode_ui8 = 0;
+          cam_pan_deg_f32 = cam_set_pan(msg->val1);
+          cam_tilt_deg_f32 = cam_set_tilt(msg->val2);
           break;
         case PanTiltRelCamera:
+          cam_tilt_mode_ui8 = 1;
+          cam_pan_deg_f32 = cam_set_pan(msg->val1);
+          cam_tilt_offset_deg_f32 = msg->val2;
           break;
         case LevelCamera:
+          cam_tilt_mode_ui8 = 1;
+          cam_pan_deg_f32 = cam_set_pan(0.0f);
+          cam_tilt_offset_deg_f32 = 0.0f;
           break;
         case TuneZeroPitch:
           pitch_tgt_deg += msg->val1;

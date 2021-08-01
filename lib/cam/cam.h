@@ -17,7 +17,9 @@ void cam_pwm_cycle_end();
 
 float angle2ticks(volatile uint8_t *num_oci_tgt_ui8,
                   volatile uint8_t *oci_val_ui8,
-                  const float angle_deg_f32);
+                  const float angle_deg_f32,
+                  const int32_t pw_min_ticks_i32,
+                  const int32_t pw_max_ticks_i32);
 
 float cam_get_pan();
 float cam_get_tilt();

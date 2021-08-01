@@ -8,6 +8,48 @@
 #include "unity.h"
 #include "cam.h"
 
+void test_pan_limits(void) {
+  float pan_ang_cmd_f32;
+  float pan_ang_clc_f32;
+
+  for(int i = -1; i <= 1; ++i) {
+    pan_ang_cmd_f32 = (float)i * 90.0f;
+    pan_ang_clc_f32 = cam_set_pan(pan_ang_cmd_f32);
+
+    /*
+    Serial.print("Setting pan angle to ");
+    Serial.print(pan_ang_cmd_f32, 2);
+    Serial.print(", clc = ");
+    Serial.print(pan_ang_clc_f32, 2);
+    Serial.println(" degrees.");
+    */
+    delay(2000);
+  }
+  cam_set_pan(0.0f);
+  TEST_ASSERT_TRUE(true);
+}
+
+void test_tilt_limits(void) {
+  float tilt_ang_cmd_f32;
+  float tilt_ang_clc_f32;
+
+  for(int i = -1; i <= 1; ++i) {
+    tilt_ang_cmd_f32 = (float)i * 90.0f;
+    tilt_ang_clc_f32 = cam_set_tilt(tilt_ang_cmd_f32);
+
+    /*
+    Serial.print("Setting tilt angle to ");
+    Serial.print(tilt_ang_cmd_f32, 2);
+    Serial.print(", clc = ");
+    Serial.print(tilt_ang_clc_f32, 2);
+    Serial.println(" degrees.");
+    */
+    delay(2000);
+  }
+  cam_set_tilt(0.0f);
+  TEST_ASSERT_TRUE(true);
+}
+
 void test_pan_ramp(void) {
   float pan_ang_cmd_f32 = -90.0f;
   float pan_ang_clc_f32;
@@ -62,6 +104,8 @@ void setup() {
   // Initialize serial communication
   UNITY_BEGIN();
 
+  RUN_TEST(test_pan_limits);
+  RUN_TEST(test_tilt_limits);
   RUN_TEST(test_pan_ramp);
   RUN_TEST(test_tilt_ramp);
 

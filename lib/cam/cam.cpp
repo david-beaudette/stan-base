@@ -14,14 +14,17 @@ const int32_t angle_max_mdeg_i32 =  90000;
 // Number of ns per timer count
 #define tick2ns 2000
 
-const int32_t pw_min_ticks_i32 =  100000 / tick2ns;
-const int32_t pw_max_ticks_i32 = 3500000 / tick2ns;
+const int32_t pw_min_ticks_i32 = 1100000 / tick2ns;
+const int32_t pw_max_ticks_i32 = 2900000 / tick2ns;
 
 uint8_t cam_pan_num_oci_cur_ui8 = 0U;
 uint8_t cam_tilt_num_oci_cur_ui8 = 0U;
 
-uint8_t cam_pan_oci_val_ui8 = 0U;
-uint8_t cam_tilt_oci_val_ui8 = 0U;
+volatile uint8_t cam_pan_oci_val_ui8 = 0U;
+volatile uint8_t cam_tilt_oci_val_ui8 = 0U;
+
+volatile uint8_t cam_pan_num_oci_cmd_ui8 = 0U;
+volatile uint8_t cam_tilt_num_oci_cmd_ui8 = 0U;
 
 uint8_t cam_pan_num_oci_tgt_ui8 = 0U;
 uint8_t cam_tilt_num_oci_tgt_ui8 = 0U;
@@ -43,6 +46,8 @@ void cam_init() {
   digitalWrite(CAM_PAN_PIN, HIGH);
   digitalWrite(CAM_TILT_PIN, HIGH);
 
+  cam_center();
+
   // Disable interrupts globally
   cli();
 
@@ -60,10 +65,13 @@ void cam_init() {
   // Set clock source with 32 cycles prescaler
   TCCR2B = 0x03;
 
-  // Set initial target pulse width 
-  // to 1500 ms (servo centered)
-  OCR2A = 127; 
-  OCR2B = 127;
+  // Set initial target pulse width using value computed
+  // by the centring function
+  OCR2A = cam_pan_oci_val_ui8;
+  OCR2B = cam_tilt_oci_val_ui8;
+
+  cam_pan_num_oci_tgt_ui8 = cam_pan_num_oci_cmd_ui8;
+  cam_tilt_num_oci_tgt_ui8 = cam_tilt_num_oci_cmd_ui8;
 
   // Enable interrupts globally
   sei();
@@ -71,28 +79,32 @@ void cam_init() {
 }
 
 void cam_center() {
-  pan_angle_cmd_deg_f32 = 0;
-  tilt_angle_cmd_deg_f32 = 0;
+  cam_set_pan(0.0f);
+  cam_set_tilt(0.0f);
 }
 
-void cam_set_pan(float angle_deg_f32) {
+float cam_set_pan(float angle_deg_f32) {
 
   // Compute the corresponding pulse width
-  pan_angle_cmd_deg_f32 = angle2ticks(&cam_pan_num_oci_tgt_ui8,
+  pan_angle_cmd_deg_f32 = angle2ticks(&cam_pan_num_oci_cmd_ui8,
                                       &cam_pan_oci_val_ui8,
                                       angle_deg_f32);
+
+  return pan_angle_cmd_deg_f32;
 }
 
-void cam_set_tilt(float angle_deg_f32) {
+float cam_set_tilt(float angle_deg_f32) {
 
   // Compute the corresponding pulse width
-  tilt_angle_cmd_deg_f32 = angle2ticks(&cam_tilt_num_oci_tgt_ui8,
+  tilt_angle_cmd_deg_f32 = angle2ticks(&cam_tilt_num_oci_cmd_ui8,
                                        &cam_tilt_oci_val_ui8,
                                        angle_deg_f32);
-  
+
+  return tilt_angle_cmd_deg_f32;  
 }
-float angle2ticks(uint8_t *num_oci_tgt_ui8,
-                  uint8_t *oci_val_ui8,
+
+float angle2ticks(volatile uint8_t *num_oci_tgt_ui8,
+                  volatile uint8_t *oci_val_ui8,
                   const float angle_deg_f32) {
 
   int32_t angle_mdeg_i32 = (int32_t)(angle_deg_f32 * 1000.0f);
@@ -117,7 +129,7 @@ float angle2ticks(uint8_t *num_oci_tgt_ui8,
 
   float angle_clc_deg_f32 = (float)angle_mdeg_i32 * 0.001f;
 
-  return angle_clc_deg_f32;
+  return (float)pw_len_ticks * 2000.0f; //angle_clc_deg_f32;
 }
 
 float cam_get_pan() {
@@ -133,7 +145,7 @@ ISR(TIMER2_COMPA_vect)
 {
   ++cam_pan_num_oci_cur_ui8;
   // Check for end of pulse period
-  if(cam_pan_num_oci_cur_ui8 == cam_pan_num_oci_tgt_ui8) {
+  if(cam_pan_num_oci_cur_ui8 >= cam_pan_num_oci_tgt_ui8) {
     // End PWM pulse
     digitalWrite(CAM_PAN_PIN, LOW);
   }
@@ -167,5 +179,9 @@ ISR(TIMER2_OVF_vect) {
     // Update counter compare values
     OCR2A = cam_pan_oci_val_ui8;
     OCR2B = cam_tilt_oci_val_ui8;
+
+    cam_pan_num_oci_tgt_ui8 = cam_pan_num_oci_cmd_ui8;
+    cam_tilt_num_oci_tgt_ui8 = cam_tilt_num_oci_cmd_ui8;
+
   }
 }

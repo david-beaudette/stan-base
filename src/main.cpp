@@ -71,6 +71,7 @@ void setup()
   // Initialise tasks
   nav_init(gnc_task_dt);
   ctl_init();
+  cam_init();
 
   ctl_pid.SetMode(AUTOMATIC);
   ctl_pid.SetSampleTime(10);

@@ -12,16 +12,17 @@ void test_pan_ramp(void) {
   float pan_ang_cmd_f32 = -90.0f;
   float pan_ang_clc_f32;
 
-  for(int i = 0; i < 180; ++i) {
-    pan_ang_cmd_f32 += 1.0f;
+  for(int i = 0; i < 90; ++i) {
+    pan_ang_cmd_f32 += 2.0f;
     pan_ang_clc_f32 = cam_set_pan(pan_ang_cmd_f32);
 
+    /*
     Serial.print("Setting pan angle to ");
     Serial.print(pan_ang_cmd_f32, 2);
     Serial.print(", clc = ");
     Serial.print(pan_ang_clc_f32, 2);
     Serial.println(" degrees.");
-
+    */
     delay(200);
   }
   cam_set_pan(0.0f);
@@ -32,16 +33,16 @@ void test_tilt_ramp(void) {
   float tilt_ang_cmd_f32 = -90.0f;
   float tilt_ang_clc_f32;
 
-  for(int i = 0; i < 180; ++i) {
-    tilt_ang_cmd_f32 += 1.0f;
+  for(int i = 0; i < 90; ++i) {
+    tilt_ang_cmd_f32 += 2.0f;
     tilt_ang_clc_f32 = cam_set_tilt(tilt_ang_cmd_f32);
-
+    /*
     Serial.print("Setting tilt angle to ");
     Serial.print(tilt_ang_cmd_f32, 2);
     Serial.print(", clc = ");
     Serial.print(tilt_ang_clc_f32, 2);
     Serial.println(" degrees.");
-
+    */
     delay(200);
   }
   cam_set_tilt(0.0f);

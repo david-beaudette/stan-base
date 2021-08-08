@@ -316,13 +316,14 @@ void serial_cmd_recv()
           blink_task.setInterval((unsigned long)(msg->val1 * 1000.0f));
           break;
         case SetRunningState:
-          motors_enabled = (msg->val1 > 0.5f);
-          if (motors_enabled)
+          if (msg->val1 > 0.5f)
           {
+            motors_enabled = true;
             ctl_enable_motors();
           }
           else
           {
+            motors_enabled = false;
             ctl_disable_motors();
           }
           break;

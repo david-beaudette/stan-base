@@ -54,7 +54,7 @@ uint16_t num_bytes_written_prev = 0U;
 
 // Global variables
 double pitch_cur_deg = 0.0;
-double pitch_tgt_deg = 0.0;
+double pitch_tgt_deg = -7.2;
 double speed = 0.0;
 bool motors_enabled = false;
 uint8_t cam_tilt_mode_ui8 = 1; // 0: Absolute tilt; 1: Relative tilt
@@ -63,7 +63,7 @@ float cam_tilt_deg_f32 = 0.0f;
 float cam_tilt_offset_deg_f32 = 0.0f; // Only used in mode 1
 
 // Instantiate controller
-double Kp = 0.1, Ki = 0, Kd = 0;
+double Kp = 1.0, Ki = 0, Kd = 0;
 PID ctl_pid(&pitch_cur_deg, &speed, &pitch_tgt_deg,
             Kp, Ki, Kd, DIRECT);
 

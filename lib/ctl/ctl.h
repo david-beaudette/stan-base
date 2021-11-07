@@ -8,6 +8,8 @@
 
 #include "Arduino.h"
 
+// Pins 
+
 #define  MOTL_STEP_PIN   9 // PB1
 #define  MOTL_STEP_SET_OR_MASK B00000010
 #define  MOTL_STEP_CLR_AND_MASK B11111101

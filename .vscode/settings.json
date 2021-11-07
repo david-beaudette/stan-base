@@ -16,5 +16,8 @@
     "/opt/ros/foxy/lib/python3.8/site-packages"
   ],
   "python.defaultInterpreterPath": "${env:PYTHON_INSTALL_LOC}",
-  "python.pythonPath": "${env:PYTHON_INSTALL_LOC}"
+  "python.pythonPath": "${env:PYTHON_INSTALL_LOC}",
+  "files.associations": {
+    "stdlib.h": "c"
+  }
 }

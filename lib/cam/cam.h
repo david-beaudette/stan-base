@@ -1,5 +1,5 @@
 /** STAN THE STANDING ROBOT
-   Camera control function
+   Program to control the camera pan tilt servos
    by David Beaudette   
 **/
 
@@ -7,9 +7,8 @@
 #define CAM_H
 
 // On the RP2040, any even pin and the next odd pin can be used in the same PWM slice
-
-#define  CAM_PAN_PIN   11 // PB3
-#define  CAM_TILT_PIN  3  // PD3
+#define  CAM_PAN_PIN   7 
+#define  CAM_TILT_PIN  6  
 
 void cam_init();
 void cam_center();

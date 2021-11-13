@@ -1,15 +1,17 @@
+/** STAN THE STANDING ROBOT
+   Program to control the camera pan tilt servos
+   by David Beaudette   
+**/
+
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
-#include "pwm_servo.h"
+#include "cam.h"
 #include <math.h>
 
-#define PIN_OUT 16
-#define debug true
-
 void setServo(PWM *pin,float degree){
-    if (0 > degree > 180){
+    if (0 > degree && degree > 180){
         printf("Please use value of 0-180\n\r");
     }else{
         //convert the degree to uSec ticks
@@ -24,7 +26,7 @@ void setServo(PWM *pin,float degree){
         pwm_set_chan_level(pin->slice,pin->channel, pin->value);
         //Need time for the servo to move to its new position
         moveDelay(pin->delay,degree,lastDegree);
-        if(debug) printf("slice:%d channel:%d value:%d degree:%3.0f \r\n",pin->slice,pin->channel, pin->value, degree);
+        printf("slice:%d channel:%d value:%d degree:%3.0f \r\n",pin->slice,pin->channel, pin->value, degree);
     }
 }
 
@@ -60,29 +62,4 @@ PWM enableServo(int pin){
 void disableServo(PWM myServo){
     //Disable the servo
     pwm_set_enabled(myServo.slice,false);
-}
-
-
-int main()
-{
-    stdio_init_all();
-    sleep_ms(5000);
-    printf("starting...\r\n");
-
-    PWM myServo = enableServo(PIN_OUT);
-    myServo.pulseMax=2400;
-    myServo.delay = 2000;
-    for(int i = 0 ; i < 180;i++){
-        setServo(&myServo,i);
-    }
-    for(int i = 180 ; i > 0;i--){
-        setServo(&myServo,i);
-    }
-    setServo(&myServo,0.0);
-    setServo(&myServo,90.0);
-    setServo(&myServo,180.0);
-    setServo(&myServo,90.0);
-    setServo(&myServo,0.0);
-    disableServo(myServo);
-    printf("done\r\n");
 }

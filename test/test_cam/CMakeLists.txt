@@ -24,11 +24,15 @@ add_executable(stan_test_cam
 )
 
 # pull in common dependencies
-target_link_libraries(stan_test_cam pico_stdlib hardware_i2c)
+target_link_libraries(stan_test_cam 
+  pico_stdlib 
+  hardware_i2c
+  hardware_pwm
+)
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(stan_test_cam 1)
-pico_enable_stdio_uart(stan_test_cam 0)
+pico_enable_stdio_usb(stan_test_cam 0)
+pico_enable_stdio_uart(stan_test_cam 1)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(stan_test_cam)

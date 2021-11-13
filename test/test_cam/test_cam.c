@@ -1,12 +1,24 @@
 /** STAN THE STANDING ROBOT
-   Program to test the control function
+   Program to test the camera pan tilt servo control function
    by David Beaudette   
 **/
 
 // Libraries
-#include "Arduino.h"
-#include "unity.h"
+#include "hardware/i2c.h"
+#include "pico/stdlib.h"
 #include "cam.h"
+
+int main() {
+  const uint LED_PIN = PICO_DEFAULT_LED_PIN;
+  gpio_init(LED_PIN);
+  gpio_set_dir(LED_PIN, GPIO_OUT);
+  while (true) {
+    gpio_put(LED_PIN, 1);
+    sleep_ms(500);
+    gpio_put(LED_PIN, 0);
+    sleep_ms(500);
+  } 
+}
 
 void test_pan_limits(void) {
   float pan_ang_cmd_f32;

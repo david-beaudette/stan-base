@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Program",
+      "label": "Program the RP2040",
       "type": "shell",
       "command": "${workspaceFolder}/scripts/program.sh",
       "group": "build",
@@ -11,7 +11,8 @@
       ],
       "presentation": {
         "reveal": "always",
-        "panel": "new"
+        "panel": "new",
+        "close": true
       }
     }
   ]

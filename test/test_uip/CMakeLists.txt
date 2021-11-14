@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Pull in SDK (must be before project)
-include(pico_sdk_import.cmake)
+include(../../pico_sdk_import.cmake)
 
-project(stan_base C CXX ASM)
+project(stan_test_uip C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -15,30 +15,26 @@ endif()
 pico_sdk_init()
 
 include_directories(
-  lib/cam/
-  lib/uip/
+  ../../lib/uip/
 )
 
-add_executable(stan_base
-  src/main.c
-  lib/cam/cam.c
-  lib/uip/uip.c
+add_executable(stan_test_uip
+  test_uip.c
+  ../../lib/uip/uip.c
 )
 
 # pull in common dependencies
-target_link_libraries(stan_base 
+target_link_libraries(stan_test_uip 
   pico_stdlib 
   hardware_adc
-  hardware_i2c
-  hardware_pwm
 )
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(stan_base 1)
-pico_enable_stdio_uart(stan_base 0)
+pico_enable_stdio_usb(stan_test_uip 0)
+pico_enable_stdio_uart(stan_test_uip 1)
 
 # create map/bin/hex file etc.
-pico_add_extra_outputs(stan_base)
+pico_add_extra_outputs(stan_test_uip)
 
 add_compile_options(
   -Wall
@@ -46,7 +42,3 @@ add_compile_options(
   -Wno-unused-function # we have some for the docs that aren't called
   -Wno-maybe-uninitialized
 )
-
-# Add all tests
-add_subdirectory(test/test_cam)
-add_subdirectory(test/test_uip)

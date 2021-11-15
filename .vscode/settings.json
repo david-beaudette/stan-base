@@ -18,6 +18,11 @@
   "python.defaultInterpreterPath": "${env:PYTHON_INSTALL_LOC}",
   "python.pythonPath": "${env:PYTHON_INSTALL_LOC}",
   "files.associations": {
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "i2c.h": "c",
+    "cam.h": "c",
+    "clocks.h": "c",
+    "unity.h": "c",
+    "uip.h": "c"
   }
 }

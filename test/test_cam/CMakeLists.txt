@@ -16,16 +16,20 @@ pico_sdk_init()
 
 include_directories(
   ../../lib/cam/
+  ../../lib/uip/
+  ../../lib/uti/
 )
 
 add_executable(stan_test_cam
   test_cam.c
   ../../lib/cam/cam.c
+  ../../lib/uip/uip.c
 )
 
 # pull in common dependencies
 target_link_libraries(stan_test_cam 
   pico_stdlib 
+  hardware_adc
   hardware_i2c
   hardware_pwm
 )

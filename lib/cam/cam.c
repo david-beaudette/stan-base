@@ -26,7 +26,7 @@ typedef struct{
 } PWM;
 
 // Private functions from the servo library
-void set_servo_angle(PWM *pwm,float degree);
+void set_servo_angle(PWM *pwm, float degree, bool wait_b);
 PWM enable_servo(int pin);
 void disable_servos();
 void move_delay(int delay,
@@ -48,18 +48,18 @@ void cam_init() {
 }
 
 float cam_set_tilt(float angle_deg_f32) {   
-  set_servo_angle(&cam_tilt_pwm, angle_deg_f32); 
+  set_servo_angle(&cam_tilt_pwm, angle_deg_f32, false); 
   return angle_deg_f32;
 }
 
 float cam_set_pan(float angle_deg_f32) {   
-  set_servo_angle(&cam_pan_pwm, angle_deg_f32); 
+  set_servo_angle(&cam_pan_pwm, angle_deg_f32, false); 
   return angle_deg_f32;
 }
 
 void cam_center() {   
-  set_servo_angle(&cam_tilt_pwm, 0.0f); 
-  set_servo_angle(&cam_pan_pwm, 0.0f); 
+  set_servo_angle(&cam_tilt_pwm, 0.0f, false); 
+  set_servo_angle(&cam_pan_pwm, 0.0f, false); 
   return;
 }
 
@@ -68,7 +68,7 @@ void cam_disable() {
 }
 
 // Private functions definitions
-void set_servo_angle(PWM *pin, float angle_deg_f32) {
+void set_servo_angle(PWM *pin, float angle_deg_f32, bool wait_b) {
   if (angle_deg_f32 < -90.0f) {
     angle_deg_f32 = -90.0f;
   }
@@ -94,10 +94,10 @@ void set_servo_angle(PWM *pin, float angle_deg_f32) {
   pwm_set_chan_level(pin->slice, pin->channel, pin->value);
 
   // Need time for the servo to move to its new position
-  move_delay(pin->delay_us_per_deg, angle_deg_prev_f32, angle_deg_f32);
-
-  printf("slice:%d channel:%d value:%d angle_deg_f32:%3.0f \r\n", pin->slice,
-         pin->channel, pin->value, angle_deg_f32);
+  if(wait_b) {
+    move_delay(pin->delay_us_per_deg, angle_deg_prev_f32, angle_deg_f32);
+  }
+  return;
 }
 
 void move_delay(int delay_us_per_deg,
@@ -109,6 +109,8 @@ void move_delay(int delay_us_per_deg,
   int delay = fabs(angle_start_deg_f32 - angle_end_deg_f32) * delay_us_per_deg;
 
   sleep_us(delay);
+
+  return;
 }
 
 PWM enable_servo(int pin) {
@@ -144,4 +146,6 @@ PWM enable_servo(int pin) {
 void disable_servos() {
   // Disable both servos (they're on the same slice)
   pwm_set_enabled(cam_tilt_pwm.slice, false);
+
+  return;
 }

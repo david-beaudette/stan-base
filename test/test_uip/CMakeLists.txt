@@ -16,6 +16,7 @@ pico_sdk_init()
 
 include_directories(
   ../../lib/uip/
+  ../../lib/uti/
 )
 
 add_executable(stan_test_uip

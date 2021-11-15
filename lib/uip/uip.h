@@ -13,6 +13,7 @@
 
 void uip_init();
 float uip_get_pot_angle(void);
+float uip_adc_val2angle(uint16_t adc_val_ui16);
 void uip_disable();
 
 

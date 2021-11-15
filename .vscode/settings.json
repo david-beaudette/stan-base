@@ -22,6 +22,7 @@
     "i2c.h": "c",
     "cam.h": "c",
     "clocks.h": "c",
-    "unity.h": "c"
+    "unity.h": "c",
+    "uip.h": "c"
   }
 }

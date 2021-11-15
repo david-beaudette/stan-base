@@ -17,6 +17,7 @@ pico_sdk_init()
 include_directories(
   lib/cam/
   lib/uip/
+  lib/uti/
 )
 
 add_executable(stan_base

@@ -5,14 +5,15 @@
 
 // Libraries
 #include <stdio.h>
-
-#include "cam.h"
-#include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-#define RAMP_DELAY_MS 50
-#define FIXPOS_DELAY_MS 500
-#define TEST_LIMITS
+#include "cam.h"
+#include "uip.h"
+#include "uti.h"
+
+#define RAMP_DELAY_MS 10
+#define FIXPOS_DELAY_MS 250
+// #define TEST_LIMITS
 
 int main() {
   const uint LED_PIN = PICO_DEFAULT_LED_PIN;
@@ -25,6 +26,7 @@ int main() {
   printf("starting...\r\n");
 
   cam_init();
+  uip_init();
 
   cam_center();
   sleep_ms(1000);
@@ -37,7 +39,6 @@ int main() {
     cam_set_tilt(90.0f);
     cam_set_pan(90.0f);
     sleep_ms(10000);
-#endif
 
   for (int i = -95; i < 95; i++) {
     cam_set_tilt((float)i);
@@ -83,18 +84,26 @@ int main() {
   sleep_ms(FIXPOS_DELAY_MS);
   cam_set_pan(-90.0f);
   sleep_ms(1000);
+#endif
 
   cam_center();
   sleep_ms(1000);
 
-  cam_disable();
   printf("done\r\n");
 
-  while (true) {
+  float pan_angle_f32;
+  while (true) {    
     gpio_put(LED_PIN, 1);
-    sleep_ms(2500);
+    sleep_ms(50);
+    pan_angle_f32 = map(uip_get_pot_angle(), 10.0f, 85.0f, -90.0, 90.0);
+    cam_set_pan(pan_angle_f32);
     gpio_put(LED_PIN, 0);
-    sleep_ms(2500);
-    printf("Camera servo test complete.\n");
+    sleep_ms(50);
+    pan_angle_f32 = map(uip_get_pot_angle(), 10.0f, 85.0f, -90.0, 90.0);
+    cam_set_pan(pan_angle_f32);
   }
+  printf("Camera servo test complete.\n");
+  cam_disable();
+
+  return 0;
 }

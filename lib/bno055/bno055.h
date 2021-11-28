@@ -1,12 +1,18 @@
 /** STAN THE STANDING ROBOT
    Program to interface the Bosch BNO055 9DoF sensor
    by David Beaudette
+
+   Adapted from Adafruit_BNO055 Arduino Library
+   https://github.com/adafruit/Adafruit_BNO055
+   See LICENSE file for permission details
+   Copyright (c) 2018 Adafruit Industries
 **/
 
 #ifndef BNO055_H
 #define BNO055_H
 
 #include <stdint.h>
+#include "pico/stdlib.h"
 
 #define I2C_PORT i2c0
 
@@ -33,7 +39,7 @@ typedef struct {
   int16_t accel_radius; /**< acceleration radius */
 
   int16_t mag_radius; /**< magnetometer radius */
-} adafruit_bno055_offsets_t;
+} bno055_offsets_t;
 
 /** BNO055 Registers **/
 typedef enum {
@@ -262,21 +268,34 @@ typedef enum {
 //   void enterNormalMode();
 
 // private:
-//   byte read8(adafruit_bno055_reg_t);
+
 //   bool readLen(adafruit_bno055_reg_t, byte *buffer, uint8_t len);
-//   bool write8(adafruit_bno055_reg_t, byte value);
 
-//   Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
 
-//   int32_t _sensorID;
-//   adafruit_bno055_opmode_t _mode;
 // };
 
-void bno055_init(void);
+bool bno055_init(void);
 
-void accel_init(void);
+void bno055_get_accel(float *acc_f32);
+void bno055_get_linear_accel(float *lia_f32);
+void bno055_get_rpy(float *yrp_f32);
+void bno055_get_grv_vec(float *grv_vec_f32);
+void bno055_get_ome(float *ome_f32);
 
-void bno055_get_accel(float *acc);
+void bno055_read_vec(float *vec_f32, 
+                     const float scale_fac_f32, 
+                     const uint8_t *reg_i);
+
+void bno055_get_calib_state(uint8_t *sys, 
+                            uint8_t *gyro, 
+                            uint8_t *accel, 
+                            uint8_t *mag);
+
+void bno055_set_calib(const bno055_offsets_t *offsets_type);
+bool bno055_get_calib(bno055_offsets_t *offsets_type);
+bool bno055_is_fully_calibrated(void);
+
+void bno055_set_mode(bno055_opmodes mode);
 uint8_t bno055_read8(bno055_registers reg);
 void bno055_write8(bno055_registers reg, uint8_t val_ui8);
 

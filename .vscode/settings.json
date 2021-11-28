@@ -23,6 +23,9 @@
     "cam.h": "c",
     "clocks.h": "c",
     "unity.h": "c",
-    "uip.h": "c"
+    "uip.h": "c",
+    "horner.h": "c",
+    "bat.h": "c",
+    "math.h": "c"
   }
 }

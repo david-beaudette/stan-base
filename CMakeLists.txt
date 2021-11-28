@@ -23,8 +23,10 @@ include_directories(
 
 add_executable(stan_base
   src/main.c
+  lib/bat/bat.c
   lib/bno055/bno055.c
   lib/cam/cam.c
+  lib/mtr/mtr.c
   lib/uip/uip.c
 )
 
@@ -51,6 +53,8 @@ add_compile_options(
 )
 
 # Add all tests
+add_subdirectory(test/test_bat)
 add_subdirectory(test/test_bno055)
 add_subdirectory(test/test_cam)
+add_subdirectory(test/test_mtr)
 add_subdirectory(test/test_uip)

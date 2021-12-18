@@ -26,6 +26,9 @@
     "uip.h": "c",
     "horner.h": "c",
     "bat.h": "c",
-    "math.h": "c"
+    "math.h": "c",
+    "stdio.h": "c",
+    "limits": "c",
+    "*.tcc": "c"
   }
 }

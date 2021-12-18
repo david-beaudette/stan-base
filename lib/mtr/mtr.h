@@ -20,16 +20,20 @@
 #define MTR_LEFT  0U
 #define MTR_RIGHT 1U
 
-#define MTR_USTEP_FULL     1U
-#define MTR_USTEP_HALF     2U
-#define MTR_USTEP_QUARTER  4U
-#define MTR_USTEP_EIGHTH   8U
+enum MotorMicroStep {
+  MTR_USTEP_FULL    = 0,
+  MTR_USTEP_HALF    = 1,
+  MTR_USTEP_QUARTER = 2,
+  MTR_USTEP_EIGHTH  = 3,
+}; 
 
 void mtr_init();
 void mtr_enable();
 void mtr_disable();
 
-void mtr_set_speed(uint8_t motor_num_ui8, float speed_f32);
+float mtr_set_speed(uint8_t motor_num_ui8, float speed_f32);
 void mtr_set_microstep(uint8_t microstep_ui8);
+uint16_t mtr_radps2wrap(float *radps_f32, 
+                        const uint8_t micro_step_cur_ui8);
 
 #endif // MTR_H

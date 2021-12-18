@@ -16,6 +16,7 @@
 
 #define RAMP_DELAY_MS 10
 #define FIXPOS_DELAY_MS 250
+#define NUM_SPEED_VALUES 5
 // #define TEST_LIMITS
 
 int main() {
@@ -38,18 +39,31 @@ int main() {
   printf("Channel L %d  R %d\n", pwm_gpio_to_channel(MTR_STEP_L_PIN),
                                  pwm_gpio_to_channel(MTR_STEP_R_PIN));
 
-  float speed_left_f32 = 1.0f;
-  float speed_right_f32 = 1.0f;
-  while (true) {    
-    gpio_put(LED_PIN, 1);
-    mtr_set_speed(MTR_LEFT, speed_left_f32);
-    mtr_set_speed(MTR_RIGHT, speed_right_f32);
-    sleep_ms(1000);
+  float speed_left_vec_f32[NUM_SPEED_VALUES] = {0.0f, -32.9f, 0.45f, 0.26f, -0.06f};
+  float speed_right_vec_f32[NUM_SPEED_VALUES] = {0.0f, 1.0f, -1.0f, -2.0f, 2.0f};
+  float speed_left_cur_f32 = 0.0f;
+  float speed_right_cur_f32 = 0.0f;
+  bool led_state_b = true;
+  int speed_idx = 0;
 
-    gpio_put(LED_PIN, 0);
-    mtr_set_speed(MTR_LEFT, speed_left_f32);
-    mtr_set_speed(MTR_RIGHT, speed_right_f32);
+  while (true) {    
+    gpio_put(LED_PIN, led_state_b);
+    led_state_b = !led_state_b;
+
+    speed_left_cur_f32 = 
+        mtr_set_speed(MTR_LEFT, speed_left_vec_f32[speed_idx]);
+    speed_right_cur_f32 =
+        mtr_set_speed(MTR_RIGHT, speed_right_vec_f32[speed_idx]);
+
     sleep_ms(1000);
+    printf("Speed left: %f; right: %f\n",
+           speed_left_cur_f32, 
+           speed_right_cur_f32);
+
+    ++speed_idx;
+    if(speed_idx == NUM_SPEED_VALUES) {
+      speed_idx = 0;
+    }
   }
   printf("Stepper motor test complete.\n");
   mtr_disable();

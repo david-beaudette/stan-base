@@ -14,18 +14,9 @@
 
 const float stepperrev_f32 = 200.0f;
 const float wheelradperstep_f32 = 2.0f * M_PI / stepperrev_f32;
-// const float motorstepsperpulse_f32 = 1.0 / pulsesperstep_f32;
-// const float pace2ticksperpol_f32 = 0.5f *
-//                                    clocktickspersec_f32 *
-//                                    wheelradperstep_f32 *
-//                                    motorstepsperpulse_f32;
-
-// const float speed_min_pos_f32 = 1.0f * DEG_TO_RAD;
-// const float speed_min_neg_f32 = -1.0f * DEG_TO_RAD;
-
 const float speed_max_f32 = 5.23f * 2.0f * M_PI; // 5.23 rev/s
-
-// const float rev_per_pulse_f32 = 1.0f / (stepperrev_f32 * pulsesperstep_f32);
+const float clk_div_f32 = 125.0f;
+const float clk_div_inv_f32 = 1.0f / clk_div_f32;
 
 uint slice_left;
 uint channel_left; 
@@ -35,6 +26,7 @@ uint8_t micro_step_cur_ui8;
 
 float micro_step_frc_f32[4] = {1.0f, 0.5f, 0.25f, 0.125f};
 float clocktickspersec_f32;
+float speed_min_f32 = 0.064f; // eighth microstepping with 61367 us
 
 void mtr_init(void) {
   // Configure control pins
@@ -46,7 +38,7 @@ void mtr_init(void) {
   gpio_set_dir(MTR_MS1_PIN, GPIO_OUT);
   gpio_set_dir(MTR_MS2_PIN, GPIO_OUT);
 
-  mtr_set_microstep(MTR_USTEP_FULL);
+  mtr_set_microstep(MTR_USTEP_EIGHTH);
 
   // Configure direction outputs
   gpio_init(MTR_DIR_L_PIN);
@@ -115,9 +107,16 @@ float mtr_set_speed(uint8_t motor_num_ui8, float speed_f32) {
       // Reverse left motor
       gpio_put(MTR_DIR_L_PIN, 1);
     }
-    wrap_val_ui16 = mtr_radps2wrap(&speed_cur_f32, 
-                                   micro_step_cur_ui8);
-    pwm_set_wrap(slice_left, wrap_val_ui16);
+    if(speed_cur_f32 < speed_min_f32 && 
+      speed_cur_f32 > -speed_min_f32 ) {
+      pwm_set_enabled(slice_left, false);
+      speed_cur_f32 = 0.0f;
+    }
+    else {
+      wrap_val_ui16 = mtr_radps2wrap(&speed_cur_f32, micro_step_cur_ui8);
+      pwm_set_enabled(slice_left, true);
+      pwm_set_wrap(slice_left, wrap_val_ui16);
+    }
   }
   else {
     if (speed_f32 > 0.0f) {
@@ -128,9 +127,16 @@ float mtr_set_speed(uint8_t motor_num_ui8, float speed_f32) {
       // Reverse right motor
       gpio_put(MTR_DIR_R_PIN, 0);
     }
-    wrap_val_ui16 = mtr_radps2wrap(&speed_cur_f32, 
-                                   micro_step_cur_ui8);
-    pwm_set_wrap(slice_left, wrap_val_ui16);
+    if(speed_cur_f32 < speed_min_f32 && 
+      speed_cur_f32 > -speed_min_f32 ) {
+      pwm_set_enabled(slice_right, false);
+      speed_cur_f32 = 0.0f;
+    } 
+    else {
+      wrap_val_ui16 = mtr_radps2wrap(&speed_cur_f32, micro_step_cur_ui8);
+      pwm_set_enabled(slice_left, true);
+      pwm_set_wrap(slice_right, wrap_val_ui16);
+    }
   }
   return speed_cur_f32;
 }
@@ -164,13 +170,14 @@ uint16_t mtr_radps2wrap(float *radps_f32,
       micro_step_frc_f32[MIN(MTR_USTEP_EIGHTH, micro_step_cur_ui8)];
 
   // Compute the value to put in the PWM generator
-  uint16_t wrap_ui16 =
-      (uint16_t)(1.0f / (*radps_f32) * wheelradperstep_f32 *
-                 micro_step_frc_cur_f32 * clocktickspersec_f32);
+  float secprad2wrap_f32 = wheelradperstep_f32 * micro_step_frc_cur_f32 *
+       clocktickspersec_f32 * clk_div_inv_f32;
+  float wrap_f32 = 1.0f / fabsf(*radps_f32) * secprad2wrap_f32;
+  uint16_t wrap_ui16 = (uint16_t)wrap_f32;
 
   // Compute back the resulting speed for reporting               
   (*radps_f32) =
-      1.0f / (float)wrap_ui16 * micro_step_frc_cur_f32 * wheelradperstep_f32;
+      copysignf(1.0f / (float)wrap_ui16 * secprad2wrap_f32, *radps_f32);
 
   return wrap_ui16;
 }

@@ -55,7 +55,7 @@ int main() {
     speed_right_cur_f32 =
         mtr_set_speed(MTR_RIGHT, speed_right_vec_f32[speed_idx]);
 
-    sleep_ms(1000);
+    sleep_ms(500);
     printf("Speed left: %f; right: %f\n",
            speed_left_cur_f32, 
            speed_right_cur_f32);

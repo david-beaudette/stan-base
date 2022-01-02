@@ -10,6 +10,7 @@
 
 #include "hardware/clocks.h"
 #include "hardware/pwm.h"
+#include "hardware/irq.h"
 #include "pico/stdlib.h"
 
 const float stepperrev_f32 = 200.0f;
@@ -31,8 +32,12 @@ uint channel_right;
 
 uint8_t micro_step_cur_ui8;
 float micro_step_frc_f32[4] = {1.0f, 0.5f, 0.25f, 0.125f};
+int64_t step_count_left_i64 = 0;
+int64_t step_count_right_i64 = 0;
 
 float clktickspersec_f32;
+
+void mtr_pulse_isr(void);
 
 void mtr_init(void) {
   // Configure control pins
@@ -72,6 +77,12 @@ void mtr_init(void) {
   pwm_set_chan_level(slice_right, channel_right, 1);
 
   mtr_disable();
+
+  // Attach interrupts to each PWM module
+  pwm_set_irq_enabled(slice_left, true);
+  pwm_set_irq_enabled(slice_right, true);
+  irq_set_exclusive_handler(PWM_IRQ_WRAP, &mtr_pulse_isr);
+  irq_set_enabled(PWM_IRQ_WRAP, true);
 
   mtr_set_speed(MTR_LEFT,  0.0f);
   mtr_set_speed(MTR_RIGHT, 0.0f);
@@ -186,4 +197,39 @@ uint16_t mtr_radps2wrap(float *radps_f32,
       copysignf(1.0f / (float)wrap_ui16 * secprad2wrap_f32, *radps_f32);
 
   return wrap_ui16;
+}
+
+int64_t mtr_get_left_count(void) {
+  return step_count_left_i64;
+}
+
+int64_t mtr_get_right_count(void) {
+  return step_count_right_i64;
+}
+
+// Pulse counter
+void mtr_pulse_isr(void) {
+  
+  if(pwm_hw->ints & (1 << slice_left)) {
+    if(gpio_get(MTR_DIR_L_PIN)) {
+      // Reverse left 
+      --step_count_left_i64;
+    }
+    else {
+      // Forward left
+      ++step_count_left_i64;
+    }
+    pwm_clear_irq(slice_left);
+  }
+  if(pwm_hw->ints & (1 << slice_right)) {
+    if(gpio_get(MTR_DIR_R_PIN)) {
+      // Forward right 
+      ++step_count_right_i64;
+    }
+    else {
+      // Reverse right
+      --step_count_right_i64;
+    }
+    pwm_clear_irq(slice_right);
+  }
 }

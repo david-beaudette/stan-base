@@ -38,4 +38,7 @@ uint16_t mtr_radps2wrap(float *radps_f32,
                         const uint8_t micro_step_cur_ui8,
                         const float clk_div_inv_f32);
 
+int64_t mtr_get_left_count(void);
+int64_t mtr_get_right_count(void);
+
 #endif // MTR_H

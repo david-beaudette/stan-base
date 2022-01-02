@@ -39,10 +39,9 @@ int main() {
   printf("Channel L %d  R %d\n", pwm_gpio_to_channel(MTR_STEP_L_PIN),
                                  pwm_gpio_to_channel(MTR_STEP_R_PIN));
 
-  float speed_left_vec_f32[NUM_SPEED_VALUES] =  {0.0009f, -28.0f, 5.0f, 0.0201f, -0.0015f};
-  float speed_right_vec_f32[NUM_SPEED_VALUES] = {0.0000f, -29.0f, 5.0f, 0.0201f, -0.0015f};
   float speed_left_cur_f32 = 0.0f;
   float speed_right_cur_f32 = 0.0f;
+  float pot_angle_f32 = 0.0f;
   bool led_state_b = true;
   int speed_idx = 0;
 
@@ -50,12 +49,14 @@ int main() {
     gpio_put(LED_PIN, led_state_b);
     led_state_b = !led_state_b;
 
-    speed_left_cur_f32 = 
-        mtr_set_speed(MTR_LEFT, speed_left_vec_f32[speed_idx]);
-    speed_right_cur_f32 =
-        mtr_set_speed(MTR_RIGHT, speed_right_vec_f32[speed_idx]);
+    pot_angle_f32 = uip_get_pot_angle();
 
-    sleep_ms(500);
+    speed_left_cur_f32 = mtr_set_speed(
+        MTR_LEFT, map(pot_angle_f32, 0.0f, 100.0f, -50.0f, 50.0f));
+    speed_right_cur_f32 =
+        mtr_set_speed(MTR_RIGHT, speed_left_cur_f32);
+
+    sleep_ms(100);
     printf("Speed left: %f; right: %f\n",
            speed_left_cur_f32, 
            speed_right_cur_f32);

@@ -32,8 +32,10 @@ void mtr_enable();
 void mtr_disable();
 
 float mtr_set_speed(uint8_t motor_num_ui8, float speed_f32);
+
 void mtr_set_microstep(uint8_t microstep_ui8);
 uint16_t mtr_radps2wrap(float *radps_f32, 
-                        const uint8_t micro_step_cur_ui8);
+                        const uint8_t micro_step_cur_ui8,
+                        const float clk_div_inv_f32);
 
 #endif // MTR_H

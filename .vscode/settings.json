@@ -29,6 +29,7 @@
     "math.h": "c",
     "stdio.h": "c",
     "limits": "c",
-    "*.tcc": "c"
+    "*.tcc": "c",
+    "nav.h": "c"
   }
 }

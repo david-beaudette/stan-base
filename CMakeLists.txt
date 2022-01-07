@@ -17,6 +17,8 @@ pico_sdk_init()
 include_directories(
   lib/bno055/
   lib/cam/
+  lib/mtr/
+  lib/nav/
   lib/uip/
   lib/uti/
 )
@@ -27,7 +29,11 @@ add_executable(stan_base
   lib/bno055/bno055.c
   lib/cam/cam.c
   lib/mtr/mtr.c
+  lib/nav/nav.c
   lib/uip/uip.c
+  lib/uti/horner.c
+  lib/uti/pid.c
+  lib/uti/uti.c
 )
 
 # pull in common dependencies

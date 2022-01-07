@@ -6,23 +6,18 @@
 #ifndef NAV_H
 #define NAV_H
 
-extern uint32_t accel_isr_count_ui32;
-extern int16_t ax, ay, az;
-extern int16_t gy;  
-extern const float gyr_analog2degps;
+#include <stdint.h>
+#include "pico/stdlib.h"
 
-// One step of the pitch complementary filter
-void complementary_filter_step(float &pitch, int ax, int ay, int az, int gy);
-void nav_set_filter_gain(float acc_coeff_upd);
-void nav_set_avg_len(float avg_len_upd);
+void nav_get_rpy(float *rpy_est_f32);
+void nav_get_ome(float *ome_est_f32);
+float nav_get_temp();
 
-float nav_get_pitch();
-float nav_get_filter_gain();
+void nav_get_calib_state(uint8_t *gyro_ui8, 
+                         uint8_t *accel_ui8,
+                         uint8_t *mag_ui8);
 
-bool nav_get_filter_init();
-void nav_reset_filter();
-
-bool nav_init(float dt);
+bool nav_init();
 
 void nav();
 

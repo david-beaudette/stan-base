@@ -180,14 +180,15 @@ void mtr_set_microstep(uint8_t micro_step_ui8) {
   }
 }
 
+float mtr_get_micro_step_frc(void) {
+  return micro_step_frc_f32[MIN(MTR_USTEP_EIGHTH, micro_step_cur_ui8)];
+}
+
 uint16_t mtr_radps2wrap(float *radps_f32, 
                         const uint8_t micro_step_cur_ui8,
                         const float clk_div_inv_f32) {
-  float micro_step_frc_cur_f32 =
-      micro_step_frc_f32[MIN(MTR_USTEP_EIGHTH, micro_step_cur_ui8)];
-
   // Compute the value to put in the PWM generator
-  float secprad2wrap_f32 = wheelradperstep_f32 * micro_step_frc_cur_f32 *
+  float secprad2wrap_f32 = wheelradperstep_f32 * mtr_get_micro_step_frc() *
        clktickspersec_f32 * clk_div_inv_f32;
   float wrap_f32 = 1.0f / fabsf(*radps_f32) * secprad2wrap_f32;
   uint16_t wrap_ui16 = (uint16_t)wrap_f32;

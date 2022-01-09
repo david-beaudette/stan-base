@@ -30,6 +30,7 @@
     "stdio.h": "c",
     "limits": "c",
     "*.tcc": "c",
-    "nav.h": "c"
+    "nav.h": "c",
+    "ctl.h": "c"
   }
 }

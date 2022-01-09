@@ -17,6 +17,7 @@ pico_sdk_init()
 include_directories(
   lib/bno055/
   lib/cam/
+  lib/ctl/
   lib/mtr/
   lib/nav/
   lib/uip/
@@ -28,6 +29,7 @@ add_executable(stan_base
   lib/bat/bat.c
   lib/bno055/bno055.c
   lib/cam/cam.c
+  lib/ctl/ctl.c
   lib/mtr/mtr.c
   lib/nav/nav.c
   lib/uip/uip.c

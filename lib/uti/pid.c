@@ -15,37 +15,37 @@ void pid_set_gains(PidData *pid,
                    const float Tu,
                    const enum PidTuningMethod method) {
   switch (method) {
-    case P:
+    case PID_TM_P:
       pid->kp = 0.5f * Ku;
       pid->ki = 0.0f;
       pid->kd = 0.0f;
       break;
-    case PI:
+    case PID_TM_PI:
       pid->kp = 0.45f * Ku;
       pid->ki = 0.54f * Ku / Tu;
       pid->kd = 0.0f;
       break;
-    case PD:
+    case PID_TM_PD:
       pid->kp = 0.8f * Ku;
       pid->ki = 0.0f;
       pid->kd = 0.10f * Ku * Tu;
       break;
-    case PID_CLASSIC:
+    case PID_TM_CLASSIC:
       pid->kp = 0.6f * Ku;
       pid->ki = 1.2f * Ku / Tu;
       pid->kd = 0.075f * Ku * Tu;
       break;
-    case PID_PESSEN:
+    case PID_TM_PESSEN:
       pid->kp = 0.7f * Ku;
       pid->ki = 1.75f * Ku / Tu;
       pid->kd = 0.105f * Ku * Tu;
       break;
-    case PID_W_OVERSHOOT:
+    case PID_TM_W_OVERSHOOT:
       pid->kp = 0.3333333433f * Ku;
       pid->ki = 0.6666666865f * Ku / Tu;
       pid->kd = 0.1111111119f * Ku * Tu;
       break;
-    case PID_NO_OVERSHOOT:
+    case PID_TM_NO_OVERSHOOT:
     default:
       pid->kp = 0.2f * Ku;
       pid->ki = 0.40f * Ku / Tu;
@@ -58,7 +58,7 @@ float pid_step(PidData *pid, const float setpoint, const float inp, const float 
   bool int_ok = true;
   float err = setpoint - inp;
   float int_cur = pid->err_int + err;
-  float out = pid->kp * err - pid->kd * dinp + pid->ki * int_cur;
+  float out = pid->kp * err - pid->kd * dinp + pid->ki * int_cur * pid->dt;
 
   /* Check for saturation. In the event of saturation in any one direction,
      inhibit saving the integrator if doing so would deepen the saturation. */
@@ -94,4 +94,8 @@ float pid_step(PidData *pid, const float setpoint, const float inp, const float 
   }
 
   return out;
+}
+
+void pid_reset(PidData *pid) {
+  pid->err_int = 0.0f;
 }

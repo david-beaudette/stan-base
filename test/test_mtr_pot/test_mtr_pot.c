@@ -1,5 +1,5 @@
 /** STAN THE STANDING ROBOT
-   Program to test the mtrera pan pan servo control function
+   Program to test the motor control function
    by David Beaudette
 **/
 

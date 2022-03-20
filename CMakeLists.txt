@@ -64,6 +64,7 @@ add_compile_options(
 add_subdirectory(test/test_bat)
 add_subdirectory(test/test_bno055)
 add_subdirectory(test/test_cam)
+add_subdirectory(test/test_ctl)
 add_subdirectory(test/test_mtr)
 add_subdirectory(test/test_mtr_pot)
 add_subdirectory(test/test_uip)

@@ -20,7 +20,7 @@ static int BNO055_I2C_ADDR = 0x28;
 bool bno055_init(void) {
 
   // Setup I2C port
-  i2c_init(I2C_PORT, 400 * 1000);
+  i2c_init(BNO055_I2C_PORT, 400 * 1000);
   gpio_set_function(4, GPIO_FUNC_I2C);
   gpio_set_function(5, GPIO_FUNC_I2C);
   gpio_pull_up(4);
@@ -112,8 +112,8 @@ void bno055_read_vec(float *vec_f32,
   uint8_t read_buf_i[6];  
   int16_t vec_x_i16, vec_y_i16, vec_z_i16;       
 
-  i2c_write_blocking(I2C_PORT, BNO055_I2C_ADDR, reg_i, 1, true);
-  i2c_read_blocking(I2C_PORT, BNO055_I2C_ADDR, read_buf_i, 6, false);
+  i2c_write_blocking(BNO055_I2C_PORT, BNO055_I2C_ADDR, reg_i, 1, true);
+  i2c_read_blocking(BNO055_I2C_PORT, BNO055_I2C_ADDR, read_buf_i, 6, false);
 
   vec_x_i16 = ((int16_t)read_buf_i[0]) | (((int16_t)read_buf_i[1]) << 8);
   vec_y_i16 = ((int16_t)read_buf_i[2]) | (((int16_t)read_buf_i[3]) << 8);
@@ -306,14 +306,14 @@ bool bno055_is_fully_calibrated() {
 
 uint8_t bno055_read8(bno055_registers reg) {
   uint8_t i2c_buf_ui8[1] = {reg};
-  i2c_write_blocking(I2C_PORT, BNO055_I2C_ADDR, i2c_buf_ui8, 1, true);
-  i2c_read_blocking(I2C_PORT, BNO055_I2C_ADDR, i2c_buf_ui8, 1, false);
+  i2c_write_blocking(BNO055_I2C_PORT, BNO055_I2C_ADDR, i2c_buf_ui8, 1, true);
+  i2c_read_blocking(BNO055_I2C_PORT, BNO055_I2C_ADDR, i2c_buf_ui8, 1, false);
   return i2c_buf_ui8[0];
 }
 
 void bno055_write8(bno055_registers reg, uint8_t val_ui8) {
   uint8_t i2c_buf_ui8[2] = {reg, val_ui8};
-  i2c_write_blocking(I2C_PORT, BNO055_I2C_ADDR, i2c_buf_ui8, 2, true);
+  i2c_write_blocking(BNO055_I2C_PORT, BNO055_I2C_ADDR, i2c_buf_ui8, 2, true);
   return;
 }
 

@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include "pico/stdlib.h"
 
-#define I2C_PORT i2c0
+#define BNO055_I2C_PORT i2c0
 
 /** BNO055 ID **/
 #define BNO055_ID (0xA0)

@@ -31,6 +31,7 @@
     "limits": "c",
     "*.tcc": "c",
     "nav.h": "c",
-    "ctl.h": "c"
+    "ctl.h": "c",
+    "bno055.h": "c"
   }
 }

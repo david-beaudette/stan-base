@@ -22,6 +22,7 @@ include_directories(
 add_executable(stan_test_bat
   test_bat.c
   ../../lib/bat/bat.c
+  ../../lib/uti/horner.c
 )
 
 # pull in common dependencies

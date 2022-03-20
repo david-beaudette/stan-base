@@ -1,3 +1,6 @@
+#ifndef HORNER_H
+#define HORNER_H
+
 // ----------------------------------------------------------------------------
 //  y = horner(n,c,x) evaluates a polynomial y = f(x) at x.  The polynomial has
 //                    degree n-1.  The coefficients of the polynomial are stored
@@ -12,13 +15,6 @@
 //  Also note that if there are n coefficients, the polynomial is of degree n-1
 //  and the largest index in c is n-1
 
-float horner(int n, const float *c, float x) {
-  
-  float f;
-  
-  f = c[0];
-  for ( int i=1; i<n; i++ ) {
-    f = f*x + c[i];
-  }
-  return(f);
-}
+float horner(int n, const float *c, float x);
+
+#endif // HORNER_H

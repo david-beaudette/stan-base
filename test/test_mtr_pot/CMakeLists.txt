@@ -24,6 +24,7 @@ add_executable(stan_test_mtr_pot
   test_mtr_pot.c
   ../../lib/mtr/mtr.c
   ../../lib/uip/uip.c
+  ../../lib/uti/uti.c
 )
 
 # pull in common dependencies

@@ -57,9 +57,11 @@ int main() {
         mtr_set_speed(MTR_RIGHT, speed_left_cur_f32);
 
     sleep_ms(100);
-    printf("Speed left: %f; right: %f\n",
+    printf("Speed left: %f (count %lld); right: %f (count %lld)\n",
            speed_left_cur_f32, 
-           speed_right_cur_f32);
+           mtr_get_left_count(),
+           speed_right_cur_f32,
+           mtr_get_right_count());
 
     ++speed_idx;
     if(speed_idx == NUM_SPEED_VALUES) {

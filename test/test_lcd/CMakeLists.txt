@@ -22,8 +22,8 @@ include_directories(
 
 add_executable(stan_test_lcd
   test_lcd.c
-  ../../lib/lcd/lcd.c
   ../../lib/uip/uip.c
+  ../../lib/uti/uti.c
 )
 
 # pull in common dependencies

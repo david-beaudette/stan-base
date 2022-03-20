@@ -32,6 +32,9 @@
     "*.tcc": "c",
     "nav.h": "c",
     "ctl.h": "c",
-    "bno055.h": "c"
+    "bno055.h": "c",
+    "binary_info.h": "c",
+    "uti.h": "c",
+    "stdint.h": "c"
   }
 }

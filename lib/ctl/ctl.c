@@ -25,6 +25,10 @@ void ctl_init(void) {
   return;
 }
 
+PidData* ctl_get_pid(void) {
+  return &pid;
+}
+
 void ctl_start(void) {
   mtr_enable();
   return;

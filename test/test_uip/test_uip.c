@@ -21,7 +21,7 @@ int main() {
     sleep_ms(500);
     gpio_put(LED_PIN, 0);
     sleep_ms(500);
-    printf("Button position %0.2f deg.\n", uip_get_pot_angle());
+    printf("Button position %0.2f deg.\n", uip_get_pot_pct());
   }
 
   return 0;

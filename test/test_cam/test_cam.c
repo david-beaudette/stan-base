@@ -95,11 +95,11 @@ int main() {
   while (true) {    
     gpio_put(LED_PIN, 1);
     sleep_ms(50);
-    pan_angle_f32 = map(uip_get_pot_angle(), 10.0f, 85.0f, -90.0, 90.0);
+    pan_angle_f32 = map(uip_get_pot_pct(), 10.0f, 85.0f, -90.0, 90.0);
     cam_set_pan(pan_angle_f32);
     gpio_put(LED_PIN, 0);
     sleep_ms(50);
-    pan_angle_f32 = map(uip_get_pot_angle(), 10.0f, 85.0f, -90.0, 90.0);
+    pan_angle_f32 = map(uip_get_pot_pct(), 10.0f, 85.0f, -90.0, 90.0);
     cam_set_pan(pan_angle_f32);
   }
   printf("Camera servo test complete.\n");

@@ -17,6 +17,7 @@ typedef struct PidData
 } PidData;
 
 enum PidTuningMethod{
+  PID_TM_KU,
   PID_TM_P,
   PID_TM_PI,
   PID_TM_PD,

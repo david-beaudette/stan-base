@@ -7,9 +7,10 @@
 #define CTL_H
 
 #include "pico/stdlib.h"
+#include "pid.h"
 
 void ctl_init(void);
-
+PidData* ctl_get_pid(void);
 void ctl_start(void);
 void ctl_stop(void);
 

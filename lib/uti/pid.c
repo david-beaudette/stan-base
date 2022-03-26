@@ -15,6 +15,11 @@ void pid_set_gains(PidData *pid,
                    const float Tu,
                    const enum PidTuningMethod method) {
   switch (method) {
+    case PID_TM_KU:
+      pid->kp = Ku;
+      pid->ki = 0.0f;
+      pid->kd = 0.0f;
+      break;
     case PID_TM_P:
       pid->kp = 0.5f * Ku;
       pid->ki = 0.0f;
@@ -22,7 +27,9 @@ void pid_set_gains(PidData *pid,
       break;
     case PID_TM_PI:
       pid->kp = 0.45f * Ku;
-      pid->ki = 0.54f * Ku / Tu;
+      if(Tu > 1e-9) {
+        pid->ki = 0.54f * Ku / Tu;
+      }
       pid->kd = 0.0f;
       break;
     case PID_TM_PD:
@@ -32,23 +39,31 @@ void pid_set_gains(PidData *pid,
       break;
     case PID_TM_CLASSIC:
       pid->kp = 0.6f * Ku;
-      pid->ki = 1.2f * Ku / Tu;
+      if(Tu > 1e-9) {
+        pid->ki = 1.2f * Ku / Tu;
+      }
       pid->kd = 0.075f * Ku * Tu;
       break;
     case PID_TM_PESSEN:
       pid->kp = 0.7f * Ku;
-      pid->ki = 1.75f * Ku / Tu;
+      if(Tu > 1e-9) {
+        pid->ki = 1.75f * Ku / Tu;
+      }
       pid->kd = 0.105f * Ku * Tu;
       break;
     case PID_TM_W_OVERSHOOT:
       pid->kp = 0.3333333433f * Ku;
-      pid->ki = 0.6666666865f * Ku / Tu;
+      if(Tu > 1e-9) {
+        pid->ki = 0.6666666865f * Ku / Tu;
+      }
       pid->kd = 0.1111111119f * Ku * Tu;
       break;
     case PID_TM_NO_OVERSHOOT:
     default:
       pid->kp = 0.2f * Ku;
-      pid->ki = 0.40f * Ku / Tu;
+      if(Tu > 1e-9) {
+        pid->ki = 0.40f * Ku / Tu;
+      }
       pid->kd = 0.06666667014f * Ku * Tu;
       break;
   }

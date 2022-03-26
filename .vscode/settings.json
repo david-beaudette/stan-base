@@ -35,6 +35,7 @@
     "bno055.h": "c",
     "binary_info.h": "c",
     "uti.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "pid.h": "c"
   }
 }

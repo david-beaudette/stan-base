@@ -14,14 +14,14 @@ void uip_init() {
   adc_gpio_init(UIP_POT_PIN);
 }
 
-float uip_get_pot_angle(void) {
+float uip_get_pot_pct(void) {
   adc_select_input(UIP_POT_ADC_CH);
   uint16_t adc_val_ui16 = adc_read();
 
-  return uip_adc_val2angle(adc_val_ui16);
+  return uip_adc_val2pct(adc_val_ui16);
 }
 
-float uip_adc_val2angle(uint16_t adc_val_ui16) {
+float uip_adc_val2pct(uint16_t adc_val_ui16) {
 
   const float analog2pct_coeff[4] = {
     2.614E-09f,	

@@ -49,7 +49,7 @@ int main() {
     gpio_put(LED_PIN, led_state_b);
     led_state_b = !led_state_b;
 
-    pot_angle_f32 = uip_get_pot_angle();
+    pot_angle_f32 = uip_get_pot_pct();
 
     speed_left_cur_f32 = mtr_set_speed(
         MTR_LEFT, map(pot_angle_f32, 0.0f, 100.0f, -50.0f, 50.0f));

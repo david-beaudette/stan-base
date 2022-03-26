@@ -15,16 +15,21 @@ endif()
 pico_sdk_init()
 
 include_directories(
+  ../../lib/bno055/
   ../../lib/ctl/
+  ../../lib/lcd/
   ../../lib/mtr/
+  ../../lib/nav/
   ../../lib/uip/
   ../../lib/uti/
 )
 
 add_executable(stan_test_ctl
   test_ctl.c
+  ../../lib/bno055/bno055.c
   ../../lib/ctl/ctl.c
   ../../lib/mtr/mtr.c
+  ../../lib/nav/nav.c
   ../../lib/uip/uip.c
   ../../lib/uti/pid.c
   ../../lib/uti/uti.c

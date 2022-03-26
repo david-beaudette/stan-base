@@ -37,7 +37,7 @@ int main() {
     gpio_put(LED_PIN, led_state_b);
     led_state_b = !led_state_b;
 
-    pot_pct_f32 = uip_get_pot_angle();
+    pot_pct_f32 = uip_get_pot_pct();
 
     lcd_setCursor(1, 0);
     sprintf(pot_str, "Pot pos: %6.2f%%", pot_pct_f32);

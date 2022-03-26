@@ -24,6 +24,7 @@ add_executable(stan_test_cam
   test_cam.c
   ../../lib/cam/cam.c
   ../../lib/uip/uip.c
+  ../../lib/uti/uti.c
 )
 
 # pull in common dependencies

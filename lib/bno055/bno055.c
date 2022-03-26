@@ -21,10 +21,10 @@ bool bno055_init(void) {
 
   // Setup I2C port
   i2c_init(BNO055_I2C_PORT, 400 * 1000);
-  gpio_set_function(4, GPIO_FUNC_I2C);
-  gpio_set_function(5, GPIO_FUNC_I2C);
-  gpio_pull_up(4);
-  gpio_pull_up(5);
+  gpio_set_function(BNO055_I2C_SDA, GPIO_FUNC_I2C);
+  gpio_set_function(BNO055_I2C_SCL, GPIO_FUNC_I2C);
+  gpio_pull_up(BNO055_I2C_SDA);
+  gpio_pull_up(BNO055_I2C_SCL);
 
   // Add a short delay for the BNO005 to boot up
   // POR time is typ. 400 ms + 50% margin

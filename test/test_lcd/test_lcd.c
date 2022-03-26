@@ -6,8 +6,8 @@
 // Libraries
 #include <stdio.h>
 
-#include "lcd.h"
 #include "pico/stdlib.h"
+#include "lcd.h"
 #include "uip.h"
 
 int main() {
@@ -42,8 +42,8 @@ int main() {
     lcd_setCursor(1, 0);
     sprintf(pot_str, "Pot pos: %6.2f%%", pot_pct_f32);
     lcd_print(pot_str);
-
-    sleep_ms(1000);
+    printf("%s\n", pot_str);
+    sleep_ms(500);
   }
 
   return 0;

@@ -33,7 +33,6 @@ add_executable(stan_base
   lib/mtr/mtr.c
   lib/nav/nav.c
   lib/uip/uip.c
-  lib/uti/horner.c
   lib/uti/pid.c
   lib/uti/uti.c
 )

@@ -135,6 +135,8 @@ uint8_t lcd_init() {
   gpio_pull_up(LCD_I2C_SDA);
   gpio_pull_up(LCD_I2C_SCL);
 
+  bi_decl(bi_2pins_with_func(LCD_I2C_SDA, LCD_I2C_SCL, GPIO_FUNC_I2C));
+
   lcd_send_byte(0x03, LCD_COMMAND, 1);
   lcd_send_byte(0x03, LCD_COMMAND, 1);
   lcd_send_byte(0x03, LCD_COMMAND, 1);

@@ -22,7 +22,7 @@ include_directories(
 add_executable(stan_test_uip
   test_uip.c
   ../../lib/uip/uip.c
-  ../../lib/uti/horner.c
+  ../../lib/uti/uti.c
 )
 
 # pull in common dependencies

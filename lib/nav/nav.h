@@ -19,6 +19,4 @@ void nav_get_calib_state(uint8_t *gyro_ui8,
 
 bool nav_init();
 
-void nav();
-
 #endif // NAV_H

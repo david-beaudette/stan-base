@@ -32,8 +32,8 @@ void nav_get_rpy(float *rpy_est_f32) {
   bno055_get_rpy(yrp_f32);
 
   rpy_est_f32[0] = -yrp_f32[1];
-  rpy_est_f32[0] =  yrp_f32[2];
-  rpy_est_f32[0] =  yrp_f32[0];
+  rpy_est_f32[1] =  yrp_f32[2];
+  rpy_est_f32[2] =  yrp_f32[0];
 
   return;
 }

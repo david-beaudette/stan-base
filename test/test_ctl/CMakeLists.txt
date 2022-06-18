@@ -15,6 +15,7 @@ endif()
 pico_sdk_init()
 
 include_directories(
+  ../../lib/bat/
   ../../lib/bno055/
   ../../lib/ctl/
   ../../lib/lcd/
@@ -26,6 +27,7 @@ include_directories(
 
 add_executable(stan_test_ctl
   test_ctl.c
+  ../../lib/bat/bat.c
   ../../lib/bno055/bno055.c
   ../../lib/ctl/ctl.c
   ../../lib/mtr/mtr.c

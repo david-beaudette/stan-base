@@ -7,6 +7,7 @@
 #define BAT_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define BAT_PIN 26 
 #define BAT_ADC_CH 0 
@@ -22,6 +23,7 @@ float bat_get_voltage(void);
 void bat_show_voltage(void);
 
 float bat_get_state_of_charge(void);
+float bat_get_filt_state_of_charge(void);
 void bat_show_state_of_charge(void);
 
 #endif // BAT_H

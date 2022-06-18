@@ -300,7 +300,7 @@ bool bno055_is_fully_calibrated() {
   case OPERATION_MODE_MAGGYRO:
     return (mag == 3 && gyro == 3);
   default:
-    return (system == 3 && gyro == 3 && accel == 3 && mag == 3);
+    return (gyro == 3 && accel == 3 && mag == 3);
   }
 }
 

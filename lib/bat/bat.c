@@ -19,6 +19,10 @@ const float analog2pct_coeff[4] = {
   -27930.96502
 };
 
+const float filt_coeff = 0.05f;
+const float filt_coeff_complement = 1.0f - filt_coeff;
+float filt_last_val = 0.0f;
+
 uint16_t bat_adc_val_prev_ui16 = 0;
 
 void bat_init() {
@@ -56,6 +60,12 @@ float bat_get_state_of_charge(void) {
     soc_f32 = 0.0f;
   }
   return soc_f32;
+}
+
+float bat_get_filt_state_of_charge(void) {
+  filt_last_val *= filt_coeff_complement;
+  filt_last_val += bat_get_state_of_charge() * filt_coeff;
+  return filt_last_val;
 }
 
 void bat_show_state_of_charge(void) {

@@ -1,5 +1,5 @@
 ### Install RPi Pico SDK
-In a personal folder:
+In a personal folder called projects (could be other):
 ```bash
 cd ~/projects
 mkdir pico
@@ -14,9 +14,11 @@ sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
 cd pico-examples
 mkdir build
 cd build
-export PICO_SDK_PATH=../../pico-sdk
+echo "export PICO_SDK_PATH=~/projects/pico-sdk" >> ~/.bashrc
+source ~/.bashrc
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 make -j4
+
 ```
 ### Install OpenOCD and debugger
 ```bash
@@ -40,8 +42,9 @@ sudo usermod -a -G plugdev [username]
 ```
 Log out and back in.
 
-
-To debug, start opencd in a seperate terminal in the ~/pico/openocd folder:
+### Debugging session
+To debug, start opencd in a seperate terminal in the ~/projects/pico/openocd folder:
 ```bash
+cd ~/projects/pico/openocd
 src/openocd -f interface/picoprobe.cfg -f target/rp2040.cfg -s tcl
 ```

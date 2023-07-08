@@ -48,3 +48,19 @@ To debug, start opencd in a seperate terminal in the ~/projects/pico/openocd fol
 cd ~/projects/pico/openocd
 src/openocd -f interface/picoprobe.cfg -f target/rp2040.cfg -s tcl
 ```
+
+### Current state
+## Battery voltage reading
+Battery / motor ground is decoupled from digital ground. That is good, however the voltage reading is offset and unreliable because of this. Apparently with proper star grounding the grounds could be connected together without issues. Otherwise the most reliable way of achieving this would be to use a seperate DC/DC converter and ADC on the high-power side, and opto-coupler on the digital link to RP2040. 
+
+## Orientation sensor calibration
+A proper procedure to calibrate the BNO055 should be written. Ideally it should be automated when/if the robot can achieve it by itself.
+
+## Serial communication with head
+The link between base and head (ROS-based) was not completed yet.
+
+## Stability
+Finish test_ctl
+
+## LCD
+LCD is not working anymore...
